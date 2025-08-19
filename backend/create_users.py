@@ -17,12 +17,10 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-# List of users to create with maximum privileges
+# List of users to create with maximum privileges,
+# Your users was created, just replace with your context
 users = [
-    ("sara", "Sara1234"),
-    ("samuel", "Samuel1234"),
-    ("david", "David1234"),
-    ("nicolas", "Nicolas1234"),
+    ("name", "Name1234"),
 ]
 
 for username, password in users:
