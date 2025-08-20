@@ -10,7 +10,7 @@ services:
       - db
 
   frontend:
-    build: ./frontend   # <--- usa el Dockerfile del frontend
+    build: ./frontend-vite   
     image: lacastrilp/cocoa-frontend:latest
     container_name: frontend_app
     env_file: .env
