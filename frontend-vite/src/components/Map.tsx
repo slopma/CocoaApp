@@ -1,12 +1,20 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
 import { useMap } from "react-leaflet/hooks";
 import "leaflet/dist/leaflet.css";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 
 const Map = () => {
+  const [geodata, setGeoData] = useState(null);
   const mapRef = useRef<L.Map | null>(null);
   const position: [number, number] = [6.20018, -75.57843];
+
+  useEffect(() => {
+    fetch("/frontend-vite/public/data/eafit_example.geojson")
+    .then((res) => res.json())
+    .then((data) => setGeoData(data))
+    .catch((err) => console.error("Error al cargar GeoJSON", err))
+  })
   return (
     <>
       <div
@@ -49,6 +57,7 @@ const Map = () => {
               A pretty CSS3 popup. <br /> Easily customizable.
             </Popup>
           </Marker>
+          {geodata && <GeoJSON data={geodata} />}
         </MapContainer>
       </div>
     </>
