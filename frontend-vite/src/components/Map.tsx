@@ -6,6 +6,7 @@ import L from "leaflet";
 
 const Map = () => {
   const mapRef = useRef<L.Map | null>(null);
+  const position: [number, number] = [6.20018, -75.57843];
   return (
     <>
       <div
@@ -28,7 +29,7 @@ const Map = () => {
         </h4>
 
         <MapContainer
-          center={[51.505, -0.09]}
+          center={position}
           zoom={13}
           scrollWheelZoom={true}
           ref={mapRef}
@@ -43,7 +44,7 @@ const Map = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <Marker position={[51.505, -0.09]}>
+          <Marker position={position}>
             <Popup>
               A pretty CSS3 popup. <br /> Easily customizable.
             </Popup>
