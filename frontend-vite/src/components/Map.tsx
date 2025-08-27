@@ -10,11 +10,11 @@ const Map = () => {
   const position: [number, number] = [6.20018, -75.57843];
 
   useEffect(() => {
-    fetch("/frontend-vite/public/data/eafit_example.geojson")
+    fetch("/data/eafit_example.geojson")
     .then((res) => res.json())
     .then((data) => setGeoData(data))
     .catch((err) => console.error("Error al cargar GeoJSON", err))
-  })
+  }, [])
   return (
     <>
       <div
