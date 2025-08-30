@@ -1,41 +1,42 @@
-# Cacao App
+# Cocoa App
 
-Aplicación web para la detección y monitoreo de la maduración y enfermedades en cultivos de cacao.  
-El sistema permite a cacaocultores, investigadores y administradores registrar datos en campo, verlos en un mapa interactivo y recibir alertas sobre el estado del fruto.
+Web application for detecting and monitoring ripening and disease in cocoa crops.
 
----
-
-## Descripción del Proyecto
-La aplicación ofrece:
-- **Registro de datos en campo**: Estado del fruto (inmaduro, maduro, enfermo), ubicación geográfica, fotos y comentarios.  
-- **Mapa interactivo**: Visualización de lotes y análisis sobre un mapa georreferenciado (GeoJSON).  
-- **Alertas**: Generación automática de alertas basadas en análisis de datos.  
-- **Histórico de registros**: Consulta de la evolución de los lotes en el tiempo.  
-- **Notificaciones push**: Avisos en tiempo real sobre resultados críticos.  
-- **Integración externa**: Consumo de API de clima (OpenWeather) y recepción de datos desde sensores vía NodeRED.  
+The system allows cocoa farmers, researchers, and managers to record data in the field, view it on an interactive map, and receive alerts about the fruit's status.
 
 ---
 
-## Arquitectura
-El sistema sigue un modelo **Cliente-Servidor**:
-
-- **Frontend (App móvil):** React Native + Expo Router  
-- **Backend (API REST):** FastAPI (Python)  
-- **Base de datos:** PostgreSQL (persistencia), Firebase (notificaciones push)  
-- **Servicios externos:** NodeRED, Sensores, OpenWeather API (clima)  
-
----
-
-## Licencia
-
-Este proyecto es de uso académico y de investigación. Si deseas contribuir al proyecto, por favor crea un fork del repositorio, realiza tus cambios y envía un pull request. 
-¡Todas las contribuciones son bienvenidas!
+## Project Description
+The application offers:
+- **Field data recording**: Fruit status (unripe, ripe, diseased), geographic location, photos, and comments.
+- **Interactive map**: Visualization of plots and analysis on a georeferenced map (GeoJSON).
+- **Alerts**: Automatic generation of alerts based on data analysis.
+- **Historical records**: View the evolution of plots over time.
+- **Push notifications**: Real-time alerts about critical results.
+- **External integration**: Consumption of weather APIs (OpenWeather) and reception of data from sensors via NodeRED.
 
 ---
 
-## Autores:
+## Architecture
+The system follows a **Client-Server** model:
 
-Contáctanos para más información: 
+- **Frontend (Mobile App):** React Native + Expo Router
+- **Backend (REST API):** FastAPI (Python)
+- **Database:** PostgreSQL (persistence), Firebase (push notifications)
+- **External Services:** NodeRED, Sensors, OpenWeather API (weather)
+
+---
+
+## License
+
+This project is for academic and research use. If you wish to contribute to the project, please fork the repository, make your changes, and submit a pull request.
+All contributions are welcome!
+
+---
+
+## Authors:
+
+Contact us for more information:
 - [Luis Alejandro Castrillón](https://github.com/lacastrilp)
 - [Sara López Marín](https://github.com/slopma)
 - [Nicolás Ospina](https://github.com/niosto)
