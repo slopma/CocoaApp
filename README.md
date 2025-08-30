@@ -1,4 +1,4 @@
-# Cacao Monitoring App
+# Cocoa App
 
 Aplicación web para la detección y monitoreo de la maduración y enfermedades en cultivos de cacao.  
 El sistema permite a cacaocultores, investigadores y administradores registrar datos en campo, verlos en un mapa interactivo y recibir alertas sobre el estado del fruto.
