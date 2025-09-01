@@ -1,5 +1,4 @@
 import { MapContainer, TileLayer, Marker, Popup, GeoJSON } from "react-leaflet";
-import { useMap } from "react-leaflet/hooks";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
@@ -8,6 +7,12 @@ const Map = () => {
   const [geodata, setGeoData] = useState(null);
   const mapRef = useRef<L.Map | null>(null);
   const position: [number, number] = [6.20018, -75.57843];
+  const cacaoIcon = L.icon({
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/7387/7387376.png", 
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
+  })
 
   useEffect(() => {
     fetch("/data/eafit_example.geojson")
@@ -30,10 +35,10 @@ const Map = () => {
           style={{
             margin: "20px 0",
             textAlign: "center",
-            color: "white",
+            color: "black",
           }}
         >
-          Cocoa App Map
+
         </h4>
 
         <MapContainer
@@ -52,9 +57,11 @@ const Map = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <Marker position={position}>
+
+          <Marker position={position} icon={cacaoIcon}>
             <Popup>
-              A pretty CSS3 popup. <br /> Easily customizable.
+              Finca 1 🌱
+
             </Popup>
           </Marker>
           {geodata && <GeoJSON data={geodata} />}
