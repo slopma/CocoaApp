@@ -54,17 +54,6 @@ const ProfileScreen: React.FC = () => {
         }}>
           juan.perez@cocoapp.com
         </p>
-        <div style={{
-          backgroundColor: '#E8F5E8',
-          color: '#4CAF50',
-          padding: '6px 12px',
-          borderRadius: '16px',
-          fontSize: '12px',
-          fontWeight: '500',
-          display: 'inline-block'
-        }}>
-          Plan Premium
-        </div>
       </div>
 
       {/* Estadísticas rápidas */}

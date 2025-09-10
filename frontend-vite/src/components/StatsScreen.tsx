@@ -98,7 +98,7 @@ const StatsScreen: React.FC = () => {
             justifyContent: 'space-between', 
             marginBottom: '6px' 
           }}>
-            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Sanas</span>
+            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Sanos</span>
             <span style={{ fontSize: '14px', fontWeight: '500' }}>85%</span>
           </div>
           <div style={{
@@ -122,7 +122,7 @@ const StatsScreen: React.FC = () => {
             justifyContent: 'space-between', 
             marginBottom: '6px' 
           }}>
-            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Enfermas</span>
+            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Enfermos</span>
             <span style={{ fontSize: '14px', fontWeight: '500' }}>15%</span>
           </div>
           <div style={{

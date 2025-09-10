@@ -6,6 +6,7 @@ import ZonesScreen from './components/ZonesScreen'
 import StatsScreen from './components/StatsScreen'
 import ProfileScreen from './components/ProfileScreen'
 import { Toaster, toast } from 'sonner'
+import { createZoneNotification, NotificationTypes } from './utils/notifications'
 
 function App() {
   const [activeTab, setActiveTab] = useState('map')
@@ -23,6 +24,28 @@ function App() {
         }
       })
       .catch((err) => console.error("Error al cargar GeoJSON", err));
+  }, [])
+
+  // Simular alertas usando el módulo de notificaciones (intervalos más espaciados)
+  useEffect(() => {
+    const timers: number[] = [] as unknown as number[];
+    timers.push(window.setTimeout(() => {
+      createZoneNotification(NotificationTypes.DEVELOPMENT, { loteName: 'Zona 1' });
+    }, 5000));
+
+    timers.push(window.setTimeout(() => {
+      createZoneNotification(NotificationTypes.HARVEST_READY, { loteName: 'Zona 3', loteId: 3 });
+    }, 12000));
+
+    timers.push(window.setTimeout(() => {
+      createZoneNotification(NotificationTypes.URGENT_HARVEST, { count: 2 });
+    }, 20000));
+
+    timers.push(window.setTimeout(() => {
+      createZoneNotification(NotificationTypes.PRODUCTIVITY, { percentage: 12 });
+    }, 30000));
+
+    return () => timers.forEach((t) => clearTimeout(t));
   }, [])
 
   const analyzeZones = (data: any) => {
