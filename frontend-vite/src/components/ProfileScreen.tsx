@@ -102,7 +102,7 @@ const ProfileScreen: React.FC = () => {
               205
             </div>
             <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-              Plantas
+              Frutos
             </div>
           </div>
           <div>
