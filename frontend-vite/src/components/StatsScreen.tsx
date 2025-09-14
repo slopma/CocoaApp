@@ -1,6 +1,18 @@
 import React from 'react'
 
 const StatsScreen: React.FC = () => {
+  // Datos para el gráfico simple
+  const produccionData = [
+    { mes: 'Ene', valor: 30 },
+    { mes: 'Feb', valor: 25 },
+    { mes: 'Mar', valor: 40 },
+    { mes: 'Abr', valor: 35 },
+    { mes: 'May', valor: 50 },
+    { mes: 'Jun', valor: 45 }
+  ];
+
+  const maxValor = Math.max(...produccionData.map(d => d.valor));
+
   return (
     <div style={{ 
       padding: '20px', 
@@ -56,7 +68,7 @@ const StatsScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Gráfico placeholder */}
+      {/* Gráfico simple con CSS */}
       <div style={{
         backgroundColor: 'white',
         borderRadius: '12px',
@@ -67,17 +79,51 @@ const StatsScreen: React.FC = () => {
         <h3 style={{ margin: '0 0 16px 0', color: '#333', fontSize: '18px' }}>
           Producción Mensual
         </h3>
-        <div style={{
+        <div style={{ 
           height: '200px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '8px',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#666',
-          fontSize: '16px'
+          alignItems: 'flex-end',
+          justifyContent: 'space-around',
+          padding: '20px 10px 10px 10px'
         }}>
-          📊 Gráfico de producción
+          {produccionData.map((item, index) => (
+            <div key={index} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              flex: 1,
+              maxWidth: '50px'
+            }}>
+              <div style={{
+                backgroundColor: '#4CAF50',
+                width: '30px',
+                height: `${(item.valor / maxValor) * 140}px`,
+                borderRadius: '4px 4px 0 0',
+                marginBottom: '8px',
+                position: 'relative',
+                transition: 'height 0.3s ease'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-25px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  fontSize: '12px',
+                  color: '#666',
+                  fontWeight: '500'
+                }}>
+                  {item.valor}
+                </div>
+              </div>
+              <div style={{
+                fontSize: '12px',
+                color: '#666',
+                fontWeight: '500'
+              }}>
+                {item.mes}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

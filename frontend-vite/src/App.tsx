@@ -5,13 +5,31 @@ import BottomNavigation from './components/BottomNavigation'
 import ZonesScreen from './components/ZonesScreen'
 import StatsScreen from './components/StatsScreen'
 import ProfileScreen from './components/ProfileScreen'
+import NotificationBell from './components/NotificationBell'
 import { Toaster, toast } from 'sonner'
-import { createZoneNotification, NotificationTypes } from './utils/notifications'
+import { createZoneNotification, NotificationTypes, setNotificationCallback, createCustomNotification } from './utils/notifications'
+import { useNotifications } from './hooks/useNotifications'
 
 function App() {
   const [activeTab, setActiveTab] = useState('map')
   const [geodata, setGeoData] = useState(null)
   const hasAnalyzed = useRef(false)
+
+  // Hook de notificaciones
+  const {
+    notifications,
+    unreadCount,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll
+  } = useNotifications()
+
+  // Registrar el callback para que notifications.ts pueda usar addNotification
+  useEffect(() => {
+    setNotificationCallback(addNotification);
+  }, [addNotification]);
 
   useEffect(() => {
     fetch("/data/lotes.geojson")
@@ -29,6 +47,7 @@ function App() {
   // Simular alertas usando el módulo de notificaciones (intervalos más espaciados)
   useEffect(() => {
     const timers: number[] = [] as unknown as number[];
+    
     timers.push(window.setTimeout(() => {
       createZoneNotification(NotificationTypes.DEVELOPMENT, { loteName: 'Zona 1' });
     }, 5000));
@@ -83,6 +102,25 @@ function App() {
     generateSmartNotifications(stats);
   };
 
+  // Función auxiliar para crear notificación + toast
+  const createNotificationWithToast = (
+    type: 'error' | 'warning' | 'info' | 'success',
+    title: string,
+    message: string,
+    toastOptions: any = {}
+  ) => {
+    // Guardar en notificaciones
+    addNotification({
+      type,
+      title,
+      message
+    });
+
+    // Mostrar toast
+    const toastFn = toast[type];
+    return toastFn(message, toastOptions);
+  };
+
   const generateSmartNotifications = (stats: any) => {
     const { inmaduro, transicion, maduro, enfermo, total } = stats;
 
@@ -99,7 +137,9 @@ function App() {
     // 🚨 PRIORIDAD MÁXIMA: Lotes enfermos
     if (enfermo.length > 0) {
       if (enfermo.length === 1) {
-        toast.error(
+        createNotificationWithToast(
+          'error',
+          'Lote Enfermo - Atención Urgente',
           `🚨 URGENTE: El lote "${enfermo[0]}" está enfermo y necesita atención inmediata`,
           {
             duration: 12000,
@@ -110,7 +150,9 @@ function App() {
           }
         );
       } else if (enfermo.length === total) {
-        toast.error(
+        createNotificationWithToast(
+          'error',
+          'Situación Crítica',
           `🚨 CRÍTICO: Todos los lotes de la finca están enfermos`,
           {
             duration: 15000,
@@ -121,7 +163,9 @@ function App() {
           }
         );
       } else {
-        toast.error(
+        createNotificationWithToast(
+          'error',
+          'Múltiples Lotes Enfermos',
           `🚨 URGENTE: ${enfermo.length} lotes están enfermos: ${enfermo.join(', ')}`,
           {
             duration: 12000,
@@ -137,7 +181,9 @@ function App() {
     // ⚠️ Lotes maduros listos para cosecha
     if (maduro.length > 0) {
       if (maduro.length === 1) {
-        toast.warning(
+        createNotificationWithToast(
+          'warning',
+          'Lote Listo para Cosecha',
           `🍫 El lote "${maduro[0]}" está maduro y listo para cosecha`,
           {
             duration: 8000,
@@ -148,7 +194,9 @@ function App() {
           }
         );
       } else if (maduro.length === total && activeStates.length === 1) {
-        toast.warning(
+        createNotificationWithToast(
+          'warning',
+          'Todos los Lotes Listos',
           `🍫 Todos los lotes de la finca están maduros y listos para cosecha`,
           {
             duration: 10000,
@@ -159,7 +207,9 @@ function App() {
           }
         );
       } else {
-        toast.warning(
+        createNotificationWithToast(
+          'warning',
+          'Múltiples Lotes para Cosecha',
           `🍫 ${maduro.length} lotes listos para cosecha: ${maduro.join(', ')}`,
           {
             duration: 8000,
@@ -184,7 +234,9 @@ function App() {
       }[estadoUnico];
 
       if (estadoUnico !== 'enfermo' && estadoUnico !== 'maduro') {
-        toast.info(
+        createNotificationWithToast(
+          'info',
+          'Estado Uniforme de la Finca',
           `🌱 Todos los lotes de la finca se encuentran en ${estadoTexto}`,
           { duration: 6000 }
         );
@@ -193,12 +245,16 @@ function App() {
       // Hay mezcla de estados - mostrar solo los de desarrollo
       if (inmaduro.length > 0 && inmaduro.length < total) {
         if (inmaduro.length === 1) {
-          toast.info(
+          createNotificationWithToast(
+            'info',
+            'Lote en Desarrollo',
             `🌱 El lote "${inmaduro[0]}" se encuentra en desarrollo inicial`,
             { duration: 5000 }
           );
         } else {
-          toast.info(
+          createNotificationWithToast(
+            'info',
+            'Lotes en Desarrollo',
             `🌱 ${inmaduro.length} lotes en desarrollo inicial`,
             { duration: 5000 }
           );
@@ -207,12 +263,16 @@ function App() {
 
       if (transicion.length > 0 && transicion.length < total) {
         if (transicion.length === 1) {
-          toast.info(
+          createNotificationWithToast(
+            'info',
+            'Lote en Transición',
             `🌿 El lote "${transicion[0]}" se encuentra en fase de transición`,
             { duration: 5000 }
           );
         } else {
-          toast.info(
+          createNotificationWithToast(
+            'info',
+            'Lotes en Transición',
             `🌿 ${transicion.length} lotes en fase de transición`,
             { duration: 5000 }
           );
@@ -224,7 +284,9 @@ function App() {
     if (activeStates.length > 1) {
       const porcentajeDesarrollado = (((maduro.length + transicion.length) / total) * 100).toFixed(1);
       if (maduro.length + transicion.length > 0) {
-        toast.success(
+        createNotificationWithToast(
+          'success',
+          'Progreso de la Finca',
           `📈 ${porcentajeDesarrollado}% de la finca está en etapa avanzada (${maduro.length + transicion.length}/${total} lotes)`,
           { duration: 6000 }
         );
@@ -233,7 +295,9 @@ function App() {
 
     // 🚨 Alerta crítica para múltiples lotes maduros
     if (maduro.length >= 3) {
-      toast.error(
+      createNotificationWithToast(
+        'error',
+        'Cosecha Urgente Múltiple',
         '⏰ URGENTE: Múltiples lotes requieren cosecha inmediata para evitar pérdidas',
         {
           duration: 10000,
@@ -266,8 +330,9 @@ function App() {
 
   return (
     <div className="app">
+      {/* Notificaciones centrales */}
       <Toaster 
-        position="top-right" 
+        position="top-center" 
         richColors 
         closeButton 
         expand={true}
@@ -277,6 +342,17 @@ function App() {
           }
         }}
       />
+
+      {/* Campana de notificaciones */}
+      <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 9999 }}>
+        <NotificationBell
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          onDelete={deleteNotification}
+        />
+      </div>
       
       <main className="main-content" style={{ paddingBottom: '80px' }}>
         {renderContent()}

@@ -12,25 +12,29 @@ import CacaoEnfermo from "../assets/Cacaos/Cacao-Enfermo.png";
 
 const { BaseLayer } = LayersControl;
 
-const Map = () => {
+const Map = ({ geodata }) => {
   const [lotsData, setLotsData] = useState<any>(null);
   const [readingsData, setReadingsData] = useState<any>(null);
   const [legendCollapsed, setLegendCollapsed] = useState<boolean>(false);
-  // Leyenda eliminada por solicitud (vista mínima)
   const mapRef = useRef<L.Map | null>(null);
   const position: [number, number] = [6.20018, -75.57843];
 
   useEffect(() => {
-    fetch("/data/lotes.geojson")
-      .then((res) => res.json())
-      .then((data) => setLotsData(data))
-      .catch((err) => console.error("Error al cargar lotes.geojson", err));
+    // Usar geodata si se pasa como prop, sino cargar desde archivo
+    if (geodata) {
+      setLotsData(geodata);
+    } else {
+      fetch("/data/lotes.geojson")
+        .then((res) => res.json())
+        .then((data) => setLotsData(data))
+        .catch((err) => console.error("Error al cargar lotes.geojson", err));
+    }
 
     fetch("/data/readings.geojson")
       .then((res) => res.json())
       .then((data) => setReadingsData(data))
       .catch((err) => console.error("Error al cargar readings.geojson", err));
-  }, []);
+  }, [geodata]);
 
   // Deshabilitar scroll de la página mientras este mapa está visible
   useEffect(() => {
@@ -109,7 +113,7 @@ const Map = () => {
     const volt = p.voltaje != null ? Number(p.voltaje).toFixed(3) : "-";
     const raw = p.raw != null ? p.raw : "-";
       
-      layer.bindPopup(`
+    layer.bindPopup(`
       <div style="min-width: 220px">
         <div style="font-weight: 700; margin-bottom: 6px">Lectura de ${lote}</div>
         <div style="font-size: 12px; color: #555">${fecha}</div>
@@ -118,9 +122,9 @@ const Map = () => {
           <div>Voltaje: <strong>${volt}</strong></div>
           <div>Raw: <strong>${raw}</strong></div>
           <div>Estado: <strong>${estado}</strong></div>
-          </div>
         </div>
-      `);
+      </div>
+    `);
   };
 
   return (
@@ -138,118 +142,179 @@ const Map = () => {
     >
       <h2
         style={{
-        margin: "15px 0", 
-        textAlign: "center", 
-        color: "#2C3E50",
-        fontSize: "24px",
-        fontWeight: "600",
+          margin: "15px 0", 
+          textAlign: "center", 
+          color: "#2C3E50",
+          fontSize: "24px",
+          fontWeight: "600",
           textShadow: "0 2px 4px rgba(0,0,0,0.1)",
         }}
       >
-        🌱 Monitor de Cultivos de Cacao
+        🌱 Monitor de Cultivos
       </h2>
 
-      <MapContainer
-        center={position}
-        zoom={13}
-        style={{
-          height: "100%",
-          flex: "1 1 auto",
-          width: "96%",
-          borderRadius: "12px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-          border: "2px solid rgba(255,255,255,0.3)",
-          overflow: "hidden",
-          margin: "0 auto",
-        }}
-        ref={mapRef}
-      >
-        <LayersControl position="topright">
-          <BaseLayer checked name="🛰️ Satelital">
-            <TileLayer
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              attribution="Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics"
-              maxZoom={19}
-            />
-          </BaseLayer>
+      {/* Contenedor del mapa con posición relativa - CAMBIO CLAVE */}
+      <div style={{
+        position: "relative", // ✅ Contenedor relativo
+        height: "100%",
+        flex: "1 1 auto",
+        width: "96%",
+        borderRadius: "12px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+        border: "2px solid rgba(255,255,255,0.3)",
+        overflow: "hidden",
+        margin: "0 auto",
+      }}>
+        <MapContainer
+          center={position}
+          zoom={13}
+          style={{
+            height: "100%",
+            width: "100%", // ✅ 100% del contenedor padre
+          }}
+          ref={mapRef}
+        >
+          <LayersControl position="topright">
+            <BaseLayer checked name="🛰️ Satelital">
+              <TileLayer
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                attribution="Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics"
+                maxZoom={19}
+              />
+            </BaseLayer>
 
-          <BaseLayer name="🗺️ Calles">
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
-          </BaseLayer>
+            <BaseLayer name="🗺️ Calles">
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              />
+            </BaseLayer>
 
-          <BaseLayer name="🌐 Híbrida">
-            <TileLayer
-              url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
-              maxZoom={20}
-              subdomains={["mt0", "mt1", "mt2", "mt3"]}
-              attribution="© Google"
-            />
-          </BaseLayer>
-        </LayersControl>
+            <BaseLayer name="🌐 Híbrida">
+              <TileLayer
+                url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
+                maxZoom={20}
+                subdomains={["mt0", "mt1", "mt2", "mt3"]}
+                attribution="© Google"
+              />
+            </BaseLayer>
+          </LayersControl>
 
-        {lotsData && (
-          <GeoJSON data={lotsData} style={exactGreenStyle} onEachFeature={onEachLot} />
-        )}
+          {lotsData && (
+            <GeoJSON data={lotsData} style={exactGreenStyle} onEachFeature={onEachLot} />
+          )}
 
-        {readingsData && (
-          <GeoJSON data={readingsData} pointToLayer={pointToLayer} onEachFeature={onEachReading} />
-        )}
-      </MapContainer>
-      {/* Leyenda colapsable (sin opción de mostrar popups) */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "88px",
-          left: "10px",
-          background: "rgba(255, 255, 255, 0.95)",
-          padding: legendCollapsed ? "8px" : "12px",
-          borderRadius: "12px",
-          fontSize: "12px",
-          boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-        zIndex: 1000,
-          border: "1px solid rgba(0,0,0,0.1)",
-          backdropFilter: "blur(10px)",
-          transition: "all 180ms ease-in-out",
-          width: legendCollapsed ? "150px" : "240px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: legendCollapsed ? 0 : 8 }}>
-          <div style={{ fontWeight: 700, color: "#2C3E50", fontSize: legendCollapsed ? "12px" : "14px" }}>
-            Estados del Cacao:
+          {readingsData && (
+            <GeoJSON data={readingsData} pointToLayer={pointToLayer} onEachFeature={onEachReading} />
+          )}
+        </MapContainer>
+
+        {/* Leyenda SIEMPRE dentro del mapa - 5px del borde */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "80px", // ✅ 5px del borde inferior del mapa
+            left: "10px",   // ✅ 5px del borde izquierdo del mapa
+            background: "rgba(255, 255, 255, 0.95)",
+            padding: legendCollapsed ? "12px" : "16px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+            zIndex: 1000,
+            border: "1px solid rgba(0,0,0,0.1)",
+            backdropFilter: "blur(10px)",
+            transition: "all 180ms ease-in-out",
+            width: legendCollapsed ? "140px" : "240px", // ✅ Reducido para móviles
+            maxWidth: "calc(100% - 20px)", // ✅ Nunca más ancho que el contenedor
+          }}
+        >
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "space-between", 
+            marginBottom: legendCollapsed ? 0 : "12px" 
+          }}>
+            <div style={{ 
+              fontWeight: 700, 
+              color: "#2C3E50", 
+              fontSize: legendCollapsed ? "11px" : "13px" // ✅ Ligeramente más pequeño
+            }}>
+              Estados del Cacao:
+            </div>
+            <button
+              onClick={() => setLegendCollapsed(v => !v)}
+              aria-label={legendCollapsed ? "Expandir leyenda" : "Colapsar leyenda"}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "inherit",
+                width: 24,
+                height: 24,
+                borderRadius: 8,
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: 6,
+              }}
+            >
+              <img 
+                src={legendCollapsed ? IconExpand : IconDropdown} 
+                alt={legendCollapsed ? "Expandir" : "Colapsar"} 
+                style={{ width: 14, height: 14 }} 
+              />
+            </button>
+          </div>
+          
+          {!legendCollapsed && (
+            <div style={{ paddingTop: "4px" }}>
+              <div style={{ 
+                color: "#10259f", 
+                fontWeight: 600, 
+                marginBottom: "8px", // ✅ Reducido para que quepa mejor
+                padding: "3px 6px", // ✅ Padding más compacto
+                borderRadius: "4px",
+                backgroundColor: "rgba(16, 37, 159, 0.1)",
+                fontSize: "11px" // ✅ Texto más pequeño
+              }}>
+                🟦 Inmaduro
+              </div>
+              <div style={{ 
+                color: "#9f9a10", 
+                fontWeight: 600, 
+                marginBottom: "8px",
+                padding: "3px 6px",
+                borderRadius: "4px",
+                backgroundColor: "rgba(159, 154, 16, 0.1)",
+                fontSize: "11px"
+              }}>
+                🟨 Transición
+              </div>
+              <div style={{ 
+                color: "#259f10", 
+                fontWeight: 600, 
+                marginBottom: "8px",
+                padding: "3px 6px",
+                borderRadius: "4px",
+                backgroundColor: "rgba(37, 159, 16, 0.1)",
+                fontSize: "11px"
+              }}>
+                🟩 Maduro
+              </div>
+              <div style={{ 
+                color: "#9f1028", 
+                fontWeight: 600,
+                padding: "3px 6px",
+                borderRadius: "4px",
+                backgroundColor: "rgba(159, 16, 40, 0.1)",
+                fontSize: "11px"
+              }}>
+                🟥 Enfermo
+              </div>
+            </div>
+          )}
         </div>
-          <button
-            onClick={() => setLegendCollapsed(v => !v)}
-            aria-label={legendCollapsed ? "Expandir leyenda" : "Colapsar leyenda"}
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "inherit",
-              width: 24,
-              height: 24,
-              borderRadius: 8,
-              cursor: "pointer",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginLeft: 6,
-            }}
-          >
-            <img src={legendCollapsed ? IconExpand : IconDropdown} alt={legendCollapsed ? "Expandir" : "Colapsar"} style={{ width: 14, height: 14 }} />
-          </button>
-        </div>
-        
-        {!legendCollapsed && (
-          <div>
-            <div style={{ color: "#10259f", fontWeight: 700, marginBottom: 6 }}>- Inmaduro</div>
-            <div style={{ color: "#9f9a10", fontWeight: 700, marginBottom: 6 }}>- Transición</div>
-            <div style={{ color: "#259f10", fontWeight: 700, marginBottom: 6 }}>- Maduro</div>
-            <div style={{ color: "#9f1028", fontWeight: 700 }}>- Enfermo</div>
-        </div>
-        )}
       </div>
     </div>
   );

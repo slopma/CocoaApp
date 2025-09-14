@@ -1,0 +1,106 @@
+import { useState } from 'react';
+import './NotificationBell.css';
+
+const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllAsRead, onDelete }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const formatTime = (timestamp) => {
+    const now = new Date();
+    const notificationTime = new Date(timestamp);
+    const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Ahora';
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'error': return '🚨';
+      case 'warning': return '⚠️';
+      case 'success': return '✅';
+      case 'info': return 'ℹ️';
+      default: return '📢';
+    }
+  };
+
+  return (
+    <div className="notification-bell">
+      <button 
+        className="bell-button"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        🔔
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="notification-dropdown">
+          <div className="notification-header">
+            <h3>Notificaciones</h3>
+            {unreadCount > 0 && (
+              <button 
+                className="mark-all-read"
+                onClick={() => {
+                  onMarkAllAsRead();
+                }}
+              >
+                Marcar todas como leídas
+              </button>
+            )}
+          </div>
+
+          <div className="notification-list">
+            {notifications.length === 0 ? (
+              <div className="empty-notifications">
+                <span>📭</span>
+                <p>No hay notificaciones</p>
+              </div>
+            ) : (
+              notifications.slice(0, 10).map((notification) => (
+                <div 
+                  key={notification.id}
+                  className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                  onClick={() => !notification.read && onMarkAsRead(notification.id)}
+                >
+                  <div className="notification-icon">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="notification-content">
+                    <p className="notification-title">{notification.title}</p>
+                    <p className="notification-message">{notification.message}</p>
+                    <span className="notification-time">
+                      {formatTime(notification.timestamp)}
+                    </span>
+                  </div>
+                  <button 
+                    className="delete-notification"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(notification.id);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {notifications.length > 10 && (
+            <div className="notification-footer">
+              <button onClick={() => setIsOpen(false)}>
+                Ver todas ({notifications.length})
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default NotificationBell;
