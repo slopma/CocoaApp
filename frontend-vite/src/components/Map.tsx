@@ -20,21 +20,18 @@ const Map = ({ geodata }) => {
   const position: [number, number] = [6.20018, -75.57843];
 
   useEffect(() => {
-    // Usar geodata si se pasa como prop, sino cargar desde archivo
     if (geodata) {
       setLotsData(geodata);
-    } else {
-      fetch("/data/lotes.geojson")
-        .then((res) => res.json())
-        .then((data) => setLotsData(data))
-        .catch((err) => console.error("Error al cargar lotes.geojson", err));
     }
+  }, [geodata]);
 
+  useEffect(() => {
+    // Si aún necesitas readings, mantenemos esa carga
     fetch("/data/readings.geojson")
       .then((res) => res.json())
       .then((data) => setReadingsData(data))
       .catch((err) => console.error("Error al cargar readings.geojson", err));
-  }, [geodata]);
+  }, []);
 
   // Deshabilitar scroll de la página mientras este mapa está visible
   useEffect(() => {
@@ -91,8 +88,8 @@ const Map = ({ geodata }) => {
   // Popups: mostrar nombre de zona en polígonos
   const onEachLot = (feature: any, layer: L.Layer) => {
     if (!feature?.properties) return;
-    const lote = feature.properties.Lote || feature.properties.lote || "Zona";
-    const area = feature.properties.Area || feature.properties.area;
+    const lote = feature.properties.nombre || "Zona";
+    const area = feature.properties.area;
 
     layer.bindPopup(`
       <div style="min-width: 200px; text-align: center">

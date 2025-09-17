@@ -9,6 +9,11 @@ import NotificationBell from './components/NotificationBell'
 import { Toaster, toast } from 'sonner'
 import { createZoneNotification, NotificationTypes, setNotificationCallback, createCustomNotification } from './utils/notifications'
 import { useNotifications } from './hooks/useNotifications'
+import { supabase } from './utils/SupabaseClient';
+import { Buffer } from "buffer";
+window.Buffer = Buffer; // 👈 hace que wkx lo encuentre
+
+
 
 function App() {
   const [activeTab, setActiveTab] = useState('map')
@@ -32,17 +37,42 @@ function App() {
   }, [addNotification]);
 
   useEffect(() => {
-    fetch("/data/lotes.geojson")
-      .then((res) => res.json())
-      .then((data) => {
-        setGeoData(data)
+    const fetchLotes = async () => {
+      try {
+        const { data: lotes, error } = await supabase
+          .rpc("get_lotes_with_estado"); // ✅ solo rpc, sin .from()
+
+        if (error) throw error;
+
+        const geojson = {
+          type: "FeatureCollection",
+          features: lotes.map((lote: any) => ({
+            type: "Feature",
+            geometry: lote.geometry, // ✅ ya viene como GeoJSON desde Postgres
+            properties: {
+              lote_id: lote.lote_id,
+              nombre: lote.nombre,
+              finca: lote.finca_nombre || "Sin finca",
+              estado: lote.estado?.toLowerCase() || ""
+            }
+          })),
+        };
+
+        setGeoData(geojson);
+
         if (!hasAnalyzed.current) {
-          analyzeZones(data)
-          hasAnalyzed.current = true
+          analyzeZones(geojson);
+          hasAnalyzed.current = true;
         }
-      })
-      .catch((err) => console.error("Error al cargar GeoJSON", err));
-  }, [])
+      } catch (err) {
+        console.error("Error al cargar lotes desde Supabase:", err);
+      }
+    };
+
+    fetchLotes();
+  }, []);
+
+
 
   // Simular alertas usando el módulo de notificaciones (intervalos más espaciados)
   useEffect(() => {
@@ -70,14 +100,12 @@ function App() {
   const analyzeZones = (data: any) => {
     if (!data || !data.features) return;
 
-    // Filtrar zonas administrativas
     const productiveLots = data.features.filter((feature: any) => {
-      const lote = feature.properties?.Lote?.toLowerCase() || '';
-      const estado = feature.properties?.Estado?.toLowerCase() || '';
-      return !lote.includes('administracion') && 
-             !lote.includes('admin') && 
-             !estado.includes('administracion') &&
-             estado !== '';
+      const nombre = feature.properties?.nombre?.toLowerCase() || '';
+      const estado = feature.properties?.estado?.toLowerCase() || '';
+      return !nombre.includes('administracion') && 
+            !nombre.includes('admin') && 
+            estado !== '';
     });
 
     const stats = {
@@ -88,11 +116,10 @@ function App() {
       total: productiveLots.length
     };
 
-    // Agrupar lotes por estado con sus nombres
     productiveLots.forEach((feature: any) => {
-      const estado = feature.properties?.Estado?.toLowerCase();
-      const loteNombre = feature.properties?.Lote || 'Sin nombre';
-      
+      const estado = feature.properties?.estado;
+      const loteNombre = feature.properties?.nombre || 'Sin nombre';
+
       if (estado === 'inmaduro') stats.inmaduro.push(loteNombre);
       else if (estado === 'transicion') stats.transicion.push(loteNombre);
       else if (estado === 'maduro') stats.maduro.push(loteNombre);
@@ -101,6 +128,7 @@ function App() {
 
     generateSmartNotifications(stats);
   };
+
 
   // Función auxiliar para crear notificación + toast
   const createNotificationWithToast = (
