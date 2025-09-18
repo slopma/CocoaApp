@@ -1,7 +1,14 @@
-.notification-bell {
-  position: relative;
-  z-index: 1000;
+.notification-bell-container {
+  position: absolute;
+  top: 70px;
+  right: 10px;
+  transition: top 0.3s ease;
 }
+
+.notification-bell-container.shifted {
+  top: 160px;
+}
+
 
 .bell-button {
   position: relative;
