@@ -176,9 +176,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  display: box;              /* fallback */
   -webkit-box-orient: vertical;
+  box-orient: vertical;      /* estándar */
+  -webkit-line-clamp: 2;
+  line-clamp: 2;             /* estándar */
 }
+
 
 .notification-time {
   font-size: 11px;
