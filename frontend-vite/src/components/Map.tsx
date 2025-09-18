@@ -5,103 +5,22 @@ import {
   GeoJSON,
   LayersControl,
   Marker,
+  Popup,
   useMap,
 } from "react-leaflet";
 import { useEffect, useState, useCallback } from "react";
 import { useLotes } from "../hooks/useLotes";
 import { useCultivos } from "../hooks/useCultivos";
-import { useArboles } from "../hooks/useArboles";
 import { loteStyle, cultivoStyle } from "../utils/mapStyles";
 import { ArbolIcon, getIconForEstado } from "../utils/mapIcons";
-import { Legend } from "./Legend";
 import { getFrutoOffset } from "../utils/frutoOffset";
 import type { Arbol } from "../types";
 import L from "leaflet";
 import NotificationBell from "./NotificationBell";
-
+import { supabase } from "../utils/SupabaseClient";
 import "../components/NotificationBell.css";
 
 const { BaseLayer } = LayersControl;
-
-/**
- * Observador que vive DENTRO de MapContainer (usa useMap)
- * - Detecta cuando .leaflet-control-layers aparece/ cambia clase
- * - Llama onChange(open, bellTopPx) con la posición calculada en px (relativo al contenedor del mapa)
- */
-const LayersControlObserver: React.FC<{
-  onChange: (open: boolean, bellTopPx: number) => void;
-  defaultTopPx?: number;
-}> = ({ onChange, defaultTopPx = 70 }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    const container = map.getContainer();
-    if (!container) return;
-
-    let attrObserver: MutationObserver | null = null;
-    let listObserver: MutationObserver | null = null;
-
-    const attachToControl = (controlEl: Element) => {
-      const update = () => {
-        const isOpen = controlEl.classList.contains("leaflet-control-layers-expanded");
-        if (isOpen) {
-          const controlRect = controlEl.getBoundingClientRect();
-          const mapRect = container.getBoundingClientRect();
-          // top relative to the map container
-          const topPx = Math.max(controlRect.bottom - mapRect.top + 8, defaultTopPx);
-          onChange(true, topPx);
-        } else {
-          onChange(false, defaultTopPx);
-        }
-      };
-
-      // observe class changes
-      attrObserver = new MutationObserver(update);
-      attrObserver.observe(controlEl, { attributes: true, attributeFilter: ["class"] });
-
-      // initial check
-      update();
-    };
-
-    // Try to find control immediately
-    const tryFind = () => container.querySelector(".leaflet-control-layers");
-    const found = tryFind();
-    if (found) {
-      attachToControl(found);
-    } else {
-      // if not found yet, observe children until it's inserted
-      listObserver = new MutationObserver(() => {
-        const c = tryFind();
-        if (c) {
-          attachToControl(c);
-          if (listObserver) {
-            listObserver.disconnect();
-            listObserver = null;
-          }
-        }
-      });
-      listObserver.observe(container, { childList: true, subtree: true });
-    }
-
-    return () => {
-      if (attrObserver) attrObserver.disconnect();
-      if (listObserver) listObserver.disconnect();
-    };
-  }, [map, onChange, defaultTopPx]);
-
-  return null;
-};
-
-const FitToBounds = ({ data }: { data: GeoJSON.FeatureCollection }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (data && data.features?.length > 0) {
-      const layer = L.geoJSON(data);
-      map.fitBounds(layer.getBounds());
-    }
-  }, [data, map]);
-  return null;
-};
 
 interface MapProps {
   notifications: any[];
@@ -120,23 +39,67 @@ const Map: React.FC<MapProps> = ({
 }) => {
   const { lotesData } = useLotes();
   const { cultivosData } = useCultivos();
-  const { arbolesData } = useArboles();
-  const [selectedArbol, setSelectedArbol] = useState<Arbol | null>(null);
 
-  // estado para la posición vertical (px) de la campana
+  const fincaUnoPosition: [number, number] = [6.820910, -73.631639];
+
   const [bellTopPx, setBellTopPx] = useState<number>(70);
-
-  const position: [number, number] = [6.20018, -75.57843];
+  const [arbolesConFrutos, setArbolesConFrutos] = useState<(Arbol & { frutos: any[] })[]>([]);
+  const [selectedArbol, setSelectedArbol] = useState<string | null>(null);
 
   const handleLayersChange = useCallback((open: boolean, topPx: number) => {
     setBellTopPx(topPx);
   }, []);
 
+  // Estado cacao cacheado
+  const [estadosCacao, setEstadosCacao] = useState<{estado_cacao_id: string, nombre: string}[]>([]);
+
+  useEffect(() => {
+    const fetchEstados = async () => {
+      const { data, error } = await supabase.from("estado_cacao").select("*");
+      if (error) console.error("Error fetching estados:", error);
+      else setEstadosCacao(data || []);
+    };
+    fetchEstados();
+  }, []);
+
+  // Función auxiliar para obtener el nombre
+  const getNombreEstado = (id: string) => {
+    return estadosCacao.find(e => e.estado_cacao_id === id)?.nombre || id;
+  };
+
+
+  // Cargar todos los árboles y frutos al inicio
+  useEffect(() => {
+    const fetchArbolesYFrutos = async () => {
+      // Traer todos los árboles
+      const { data: arbolData, error: arbolError } = await supabase.from("arbol").select("*");
+      if (arbolError || !arbolData) {
+        console.error("Error fetching arboles:", arbolError);
+        return;
+      }
+
+      // Traer todos los frutos
+      const { data: frutosData, error: frutosError } = await supabase.from("fruto").select("*");
+      if (frutosError || !frutosData) {
+        console.error("Error fetching frutos:", frutosError);
+      }
+
+      // Asociar frutos a cada árbol
+      const arbolesConFrutos = arbolData.map((a: any) => ({
+        ...a,
+        frutos: frutosData?.filter((f: any) => f.arbol_id === a.arbol_id) || [],
+      }));
+
+      setArbolesConFrutos(arbolesConFrutos);
+    };
+
+    fetchArbolesYFrutos();
+  }, []);
+
   return (
     <div style={{ height: "100vh", width: "100%", position: "relative" }}>
-      {/* Contenedor padre */}
       <div style={{ height: "100%", width: "100%", position: "relative" }}>
-        <MapContainer center={position} zoom={13} style={{ height: "100%", width: "100%" }}>
+        <MapContainer center={fincaUnoPosition} zoom={17} style={{ height: "100%", width: "100%" }}>
           <LayersControl position="topright">
             <BaseLayer name="🛰️ Esri Satélite">
               <TileLayer
@@ -160,15 +123,16 @@ const Map: React.FC<MapProps> = ({
             </BaseLayer>
           </LayersControl>
 
-          {/* Observer vive dentro del MapContainer */}
-          <LayersControlObserver onChange={handleLayersChange} />
-
           {/* Lotes */}
           {lotesData && (
-            <>
-              <GeoJSON data={lotesData} style={loteStyle} />
-              <FitToBounds data={lotesData} />
-            </>
+            <GeoJSON
+              data={lotesData}
+              style={loteStyle}
+              onEachFeature={(feature, layer) => {
+                const nombre = feature.properties?.nombre || "Lote sin nombre";
+                layer.bindPopup(`<b>${nombre}</b>`);
+              }}
+            />
           )}
 
           {/* Cultivos */}
@@ -183,41 +147,57 @@ const Map: React.FC<MapProps> = ({
           )}
 
           {/* Árboles */}
-          {arbolesData &&
-            arbolesData.map((a) => {
-              const coords = a.ubicacion?.coordinates;
-              if (!coords) return null;
-              return (
-                <Marker
-                  key={a.arbol_id}
-                  position={[coords[1], coords[0]]}
-                  icon={ArbolIcon}
-                  eventHandlers={{
-                    click: () => setSelectedArbol(a),
-                  }}
-                />
-              );
-            })}
+          {arbolesConFrutos.map((a) => {
+            if (!a.ubicacion?.coordinates) return null;
+            return (
+              <Marker
+                key={a.arbol_id}
+                position={[a.ubicacion.coordinates[1], a.ubicacion.coordinates[0]]}
+                icon={ArbolIcon}
+                eventHandlers={{
+                  click: () => setSelectedArbol(a.arbol_id),
+                }}
+              >
+                {selectedArbol === a.arbol_id && (
+                  <Popup>
+                    <div>
+                      <h4>{a.nombre}</h4>
+                      <p>{a.especie}</p>
+                      <p>{getNombreEstado(a.estado_cacao_id)}</p>
+                      <h5>Frutos:</h5>
+                      {a.frutos.length > 0 ? (
+                        <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                          <ul style={{ paddingLeft: "20px", margin: 0 }}>
+                            {a.frutos.map((fr) => {
+                              const nombreEstado = getNombreEstado(fr.estado_cacao_id);
+                              const icono = getIconForEstado(nombreEstado);
+                              return (
+                                <li
+                                  key={fr.fruto_id}
+                                  style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}
+                                >
+                                  <img src={icono.options.iconUrl} alt={nombreEstado} style={{ width: 24, height: 24 }} />
+                                  <span>
+                                    {fr.Especie} - {nombreEstado} 
+                                  </span>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
 
-          {/* Frutos */}
-          {selectedArbol &&
-            Array.isArray(selectedArbol.frutos) &&
-            selectedArbol.frutos.map((fr) => {
-              const coords = selectedArbol.ubicacion?.coordinates;
-              if (!coords) return null;
-              const [offsetLat, offsetLng] = getFrutoOffset(fr.fruto_id);
-
-              return (
-                <Marker
-                  key={fr.fruto_id}
-                  position={[coords[1] + offsetLat, coords[0] + offsetLng]}
-                  icon={getIconForEstado(fr.estado_cacao_id)}
-                />
-              );
-            })}
+                      ) : (
+                        <p>Sin frutos registrados</p>
+                      )}
+                    </div>
+                  </Popup>
+                )}
+              </Marker>
+            );
+          })}
         </MapContainer>
 
-        {/* Campana: colocada fuera del canvas del mapa y posicionada dinámicamente */}
+        {/* Campana */}
         <div
           className="notification-bell-container"
           style={{
@@ -237,8 +217,7 @@ const Map: React.FC<MapProps> = ({
           />
         </div>
 
-        {/* Leyenda */}
-        <Legend />
+        
       </div>
     </div>
   );

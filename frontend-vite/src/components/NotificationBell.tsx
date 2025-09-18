@@ -1,39 +1,70 @@
-import { useState } from 'react';
-import './NotificationBell.css';
+import { useState } from "react";
+import "./NotificationBell.css";
 
-const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllAsRead, onDelete }) => {
+type NotificationType = "error" | "warning" | "success" | "info" | "default";
+
+interface Notification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  timestamp: string | number | Date;
+  read: boolean;
+}
+
+interface NotificationBellProps {
+  notifications: Notification[];
+  unreadCount: number;
+  onMarkAsRead: (id: string) => void;
+  onMarkAllAsRead: () => void;
+  onDelete: (id: string) => void;
+}
+
+const NotificationBell: React.FC<NotificationBellProps> = ({
+  notifications,
+  unreadCount,
+  onMarkAsRead,
+  onMarkAllAsRead,
+  onDelete,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const formatTime = (timestamp) => {
+  const formatTime = (timestamp: string | number | Date): string => {
     const now = new Date();
     const notificationTime = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Ahora';
+    const diffInMinutes = Math.floor(
+      (now.getTime() - notificationTime.getTime()) / (1000 * 60)
+    );
+
+    if (diffInMinutes < 1) return "Ahora";
     if (diffInMinutes < 60) return `${diffInMinutes}m`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h`;
     return `${Math.floor(diffInMinutes / 1440)}d`;
   };
 
-  const getNotificationIcon = (type) => {
+  const getNotificationIcon = (type: NotificationType): string => {
     switch (type) {
-      case 'error': return '🚨';
-      case 'warning': return '⚠️';
-      case 'success': return '✅';
-      case 'info': return 'ℹ️';
-      default: return '📢';
+      case "error":
+        return "🚨";
+      case "warning":
+        return "⚠️";
+      case "success":
+        return "✅";
+      case "info":
+        return "ℹ️";
+      default:
+        return "📢";
     }
   };
 
   return (
     <div className="notification-bell">
-      <button 
-        className="bell-button"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <button className="bell-button" onClick={() => setIsOpen(!isOpen)}>
         🔔
         {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          <span className="notification-badge">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
         )}
       </button>
 
@@ -42,7 +73,7 @@ const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllA
           <div className="notification-header">
             <h3>Notificaciones</h3>
             {unreadCount > 0 && (
-              <button 
+              <button
                 className="mark-all-read"
                 onClick={() => {
                   onMarkAllAsRead();
@@ -61,22 +92,28 @@ const NotificationBell = ({ notifications, unreadCount, onMarkAsRead, onMarkAllA
               </div>
             ) : (
               notifications.slice(0, 10).map((notification) => (
-                <div 
+                <div
                   key={notification.id}
-                  className={`notification-item ${!notification.read ? 'unread' : ''}`}
-                  onClick={() => !notification.read && onMarkAsRead(notification.id)}
+                  className={`notification-item ${
+                    !notification.read ? "unread" : ""
+                  }`}
+                  onClick={() =>
+                    !notification.read && onMarkAsRead(notification.id)
+                  }
                 >
                   <div className="notification-icon">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="notification-content">
                     <p className="notification-title">{notification.title}</p>
-                    <p className="notification-message">{notification.message}</p>
+                    <p className="notification-message">
+                      {notification.message}
+                    </p>
                     <span className="notification-time">
                       {formatTime(notification.timestamp)}
                     </span>
                   </div>
-                  <button 
+                  <button
                     className="delete-notification"
                     onClick={(e) => {
                       e.stopPropagation();

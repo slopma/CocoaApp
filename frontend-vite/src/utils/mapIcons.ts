@@ -1,29 +1,29 @@
+
 import L from "leaflet";
-import CacaoInmaduro from "../assets/Cacaos/Caco-Inmaduro.png";
-import CacaoTransicion from "../assets/Cacaos/Cacao-en-Transición.png";
-import CacaoMaduro from "../assets/Cacaos/Cacao-maduro.png";
-import CacaoEnfermo from "../assets/Cacaos/Cacao-Enfermo.png";
-import ArbolCacao from "../assets/Cacaos/arbol-de-cacao.png";
+
+// 🔹 Base pública de tu bucket en Supabase
+const supabaseBaseUrl =
+  "https://zlkdxzfxkhohlpswdmap.storage.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cacao-icons";
 
 // 🔹 Icono fijo para árboles
 export const ArbolIcon = L.icon({
-  iconUrl: ArbolCacao,
+  iconUrl: `${supabaseBaseUrl}/arbol-de-cacao.png`,
   iconSize: [28, 28],
   iconAnchor: [14, 28],
 });
 
 // 🔹 Mapear estado del fruto a ícono
 export const estadoToIconUrl: Record<string, string> = {
-  inmaduro: CacaoInmaduro,
-  transicion: CacaoTransicion,
-  maduro: CacaoMaduro,
-  enfermo: CacaoEnfermo,
+  inmaduro: `${supabaseBaseUrl}/Caco-Inmaduro.png`,
+  transición: `${supabaseBaseUrl}/Cacao-en-Transicion.png`,
+  maduro: `${supabaseBaseUrl}/Cacao-maduro.png`,
+  enfermo: `${supabaseBaseUrl}/Cacao-Enfermo.png`,
 };
 
 // 🔹 Retorna ícono de fruto según estado
 export const getIconForEstado = (estado: string) =>
   L.icon({
-    iconUrl: estadoToIconUrl[estado?.toLowerCase()] || CacaoInmaduro,
+    iconUrl: estadoToIconUrl[estado?.toLowerCase()] || estadoToIconUrl.inmaduro,
     iconSize: [22, 22],
     iconAnchor: [11, 11],
   });
