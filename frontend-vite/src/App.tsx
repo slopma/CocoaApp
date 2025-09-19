@@ -2,19 +2,20 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Map from "./components/Map";
 import BottomNavigation from "./components/BottomNavigation";
-import ZonesScreen from "./components/ZonesScreen";
-import ProfileScreen from "./components/ProfileScreen";
+import ZonesScreen from "./screen/ZonesScreen";
+import ProfileScreen from "./screen/ProfileScreen";
 import { Toaster, toast } from "sonner";
 import { useNotifications } from "./hooks/useNotifications";
 import { setNotificationCallback } from "./utils/notifications";
 import { useGeoData } from "./hooks/useGeoData";
 import { analyzeZones } from "./utils/zoneAnalizer";
 import type { NotificationType } from "./hooks/useNotifications";
-import StatsScreen from "./components/StatsScreen";
+import type { TabId } from "./config/tabs";
+import StatsScreen from "./screen/StatsScreen";
 import "leaflet/dist/leaflet.css";
 
 function App() {
-  const [activeTab, setActiveTab] = useState("map");
+  const [activeTab, setActiveTab] = useState<TabId>("map");
 
   const {
     notifications,

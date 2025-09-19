@@ -1,5 +1,5 @@
 import circle from "@turf/circle";
-import type { Arbol } from "../types";
+import type { Arbol } from "../types/db";
 import type { FeatureCollection, Polygon } from "geojson";
 import type { Feature } from "geojson";
 

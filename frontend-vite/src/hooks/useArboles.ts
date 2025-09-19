@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/SupabaseClient";
-import type { Arbol } from "../types";
+import type { Arbol } from "../types/db";
 import { useLotes } from "./useLotes";
 import { useCultivos } from "./useCultivos";
 import * as turf from "@turf/turf";

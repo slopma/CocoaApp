@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/SupabaseClient";
-import type { Lote } from "../types";
+import type { Lote } from "../types/db";
 
 export function useLotes() {
   const [lotesData, setLotesData] = useState<GeoJSON.FeatureCollection | null>(null);
