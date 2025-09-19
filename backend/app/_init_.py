@@ -4,7 +4,7 @@ import os
 # Ajustar el path para poder importar app.*
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app.db import engine, Base
+from app.models.db import engine, Base
 from app.models import models  # importa todos los modelos
 
 
