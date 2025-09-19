@@ -37,11 +37,6 @@ export function useArboles() {
 
       const { data, error } = await supabase.rpc("get_arboles_with_frutos");
 
-      console.log(
-        "✅ Respuesta Supabase get_arboles_with_frutos:",
-        JSON.stringify(data, null, 2)
-      );
-
       if (error) {
         console.error("Error cargando árboles:", error);
         setError(error.message);

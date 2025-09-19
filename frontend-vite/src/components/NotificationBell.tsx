@@ -1,5 +1,8 @@
 import { useState } from "react";
-import "./NotificationBell.css";
+import "../styles/notification-bell.css";
+import "../styles/notification-dropdown.css";
+import "../styles/notification-footer.css";
+
 
 type NotificationType = "error" | "warning" | "success" | "info" | "default";
 

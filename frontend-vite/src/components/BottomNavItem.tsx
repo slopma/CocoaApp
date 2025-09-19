@@ -18,25 +18,25 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
 }) => {
   return (
     <button
-      onClick={() => onClick(id)}
       style={{
-        background: "none",
-        border: "none",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
         gap: "4px",
         cursor: "pointer",
         color: active ? "#007AFF" : "#8E8E93",
         padding: "8px",
-        transition: "color 0.2s ease",
+        flex: 1,
         minWidth: "60px",
       }}
+      onClick={() => onClick(id)}  // ✅ Aquí se llama al callback con el id del tab
     >
       <div style={{ fontSize: "24px" }}>{icon}</div>
       <span style={{ fontSize: "10px", fontWeight: "500" }}>{label}</span>
     </button>
   );
 };
+
 
 export default BottomNavItem;

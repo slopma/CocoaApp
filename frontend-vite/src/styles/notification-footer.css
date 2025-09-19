@@ -1,0 +1,94 @@
+.notification-time {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.delete-notification {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  margin-left: 12px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  opacity: 0;
+  transition: all 0.2s;
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-item:hover .delete-notification {
+  opacity: 1;
+}
+
+.delete-notification:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.empty-notifications {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.empty-notifications span {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-notifications p {
+  margin: 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.notification-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.notification-footer button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  width: 100%;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.notification-footer button:hover {
+  background-color: rgba(59, 130, 246, 0.08);
+  color: #2563eb;
+}
+
+/* Scrollbar personalizada */
+.notification-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notification-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notification-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.notification-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}

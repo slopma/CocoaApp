@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./App.css";
+import "./styles/App.css"
 import Map from "./components/Map";
 import BottomNavigation from "./components/BottomNavigation";
 import ZonesScreen from "./screen/ZonesScreen";
@@ -83,14 +83,12 @@ function App() {
       <Toaster position="top-center" richColors closeButton expand />
 
       {/* Contenido principal ocupa todo el alto disponible */}
-      <main style={{ flex: 1, overflow: "hidden" }}>
+      <main style={{ flex: 1, overflow: "auto", paddingBottom: "60px" }}>
         {renderContent()}
       </main>
 
       {/* Barra inferior fija */}
-      <div style={{ height: "60px" }}>
         <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      </div>
     </div>
   );
 }

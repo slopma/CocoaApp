@@ -1,19 +1,38 @@
 import React from "react";
 import { tabs, type TabId } from "../config/tabs";
 import BottomNavItem from "./BottomNavItem";
-import "./BottomNavigation.css"; // estilos aparte
+import "../styles/notification-bell.css"; // estilos aparte
+import "../styles/notification-footer.css";
+import "../styles/notification-dropdown.css";
 
 interface BottomNavigationProps {
   activeTab: TabId;
   onTabChange: (id: TabId) => void;
 }
 
+// BottomNavigation.tsx
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
   onTabChange,
 }) => {
   return (
-    <nav className="bottom-navigation">
+    <nav
+      className="bottom-navigation"
+      style={{
+        display: "flex",
+        flexDirection: "row", // fila horizontal
+        justifyContent: "space-around",
+        alignItems: "center",
+        height: "60px",
+        background: "#fff",
+        borderTop: "1px solid #ddd",
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 2000,
+      }}
+    >
       {tabs.map((tab) => (
         <BottomNavItem
           key={tab.id}
@@ -27,5 +46,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     </nav>
   );
 };
+
 
 export default BottomNavigation;

@@ -11,7 +11,9 @@ import { useArboles } from "../hooks/useArboles";
 import { loteStyle, cultivoStyle } from "../utils/mapStyles";
 import NotificationBell from "./NotificationBell";
 import ArbolMarker from "./ArbolMarker";
-import "../components/NotificationBell.css";
+import "../styles/notification-bell.css";
+import "../styles/notification-footer.css";
+import "../styles/notification-dropdown.css";
 import type { FeatureCollection } from "geojson";
 
 const { BaseLayer } = LayersControl;
