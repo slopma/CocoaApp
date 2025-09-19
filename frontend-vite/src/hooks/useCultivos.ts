@@ -1,9 +1,10 @@
 // hooks/useCultivos.ts
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/SupabaseClient";
+import type { Feature, FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 
 export const useCultivos = () => {
-  const [cultivosData, setCultivosData] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [cultivosData, setCultivosData] = useState<FeatureCollection | null>(null);
 
   useEffect(() => {
     const fetchCultivos = async () => {
@@ -16,9 +17,9 @@ export const useCultivos = () => {
         return;
       }
 
-      const features = data.map((c) => ({
+      const features: Feature<Geometry, GeoJsonProperties>[] = data.map((c): Feature<Geometry, GeoJsonProperties> => ({
         type: "Feature",
-        geometry: c.poligono, // ya es GeoJSON
+        geometry: c.poligono as Geometry,
         properties: {
           cultivo_id: c.cultivo_id,
           nombre: c.nombre,
@@ -37,4 +38,5 @@ export const useCultivos = () => {
 
   return { cultivosData };
 };
+
 

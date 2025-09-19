@@ -1,5 +1,3 @@
-import { toast } from "sonner";
-
 export function analyzeZones(geojson: any, createNotificationWithToast: Function, setActiveTab: Function) {
   if (!geojson || !geojson.features) return;
 
@@ -31,7 +29,7 @@ export function analyzeZones(geojson: any, createNotificationWithToast: Function
 }
 
 function generateSmartNotifications(stats: any, createNotificationWithToast: Function, setActiveTab: Function) {
-  const { inmaduro, transicion, maduro, enfermo, total } = stats;
+  const { transicion, maduro, enfermo, total } = stats;
 
   // Ejemplo simplificado: Enfermos primero
   if (enfermo.length > 0) {

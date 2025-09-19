@@ -12,7 +12,14 @@ export function useGeoData(onReady?: (geojson: any) => void) {
     const fetchLotes = async () => {
       try {
         const { data: lotes, error } = await supabase.rpc("get_lotes_with_estado");
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+
+        if (!lotes) {
+          console.warn("No se encontraron lotes.");
+          return;
+        }
 
         const geojson = {
           type: "FeatureCollection",

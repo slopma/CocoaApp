@@ -22,14 +22,15 @@ export interface Cultivo {
 export interface Fruto {
   fruto_id: string;
   estado_fruto: string;
+  especie?: string;  
 }
 
 // Representa un Árbol con frutos
 export interface Arbol {
   arbol_id: string;
   cultivo_id: string;
-  codigo_interno: string;
-  ubicacion: GeoJSON.Point;
+  nombre: string;
+  ubicacion: GeoJSON.Point | null;
   estado_arbol: string;
   frutos: Fruto[];
 }

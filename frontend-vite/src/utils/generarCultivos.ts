@@ -14,7 +14,7 @@ export function generarCultivosCirculares(
   radio = 10
 ): FeatureCollection {
   const cultivos = arboles
-    .filter((a) => a.ubicacion?.coordinates)
+    .filter((a): a is Arbol & { ubicacion: { coordinates: [number, number] } } => !!a.ubicacion)
     .map((a, i) =>
       circle(a.ubicacion.coordinates, radio, {
         steps: 32,
@@ -22,10 +22,11 @@ export function generarCultivosCirculares(
         properties: {
           cultivo_id: `cultivo_${i}`,
           arbol_id: a.arbol_id,
-          nombre: `Cultivo_${a.codigo_interno}`,
+          nombre: `Cultivo_${a.nombre}`,
         },
       })
     );
+
 
   return {
     type: "FeatureCollection",

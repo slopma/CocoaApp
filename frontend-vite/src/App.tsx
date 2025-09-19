@@ -3,15 +3,15 @@ import "./App.css";
 import Map from "./components/Map";
 import BottomNavigation from "./components/BottomNavigation";
 import ZonesScreen from "./components/ZonesScreen";
-import StatsScreen from "./components/StatsScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import { Toaster, toast } from "sonner";
 import { useNotifications } from "./hooks/useNotifications";
 import { setNotificationCallback } from "./utils/notifications";
 import { useGeoData } from "./hooks/useGeoData";
 import { analyzeZones } from "./utils/zoneAnalizer";
-
-
+import type { NotificationType } from "./hooks/useNotifications";
+import StatsScreen from "./components/StatsScreen";
+import "leaflet/dist/leaflet.css";
 
 function App() {
   const [activeTab, setActiveTab] = useState("map");
@@ -25,18 +25,16 @@ function App() {
     deleteNotification,
   } = useNotifications();
 
-  // Pasamos addNotification a notifications.ts
   useEffect(() => {
     setNotificationCallback(addNotification);
   }, [addNotification]);
 
-  // Hook para cargar geodata y analizarlo
-  const geodata = useGeoData((geojson) => {
+  const { geodata } = useGeoData((geojson) => {
     analyzeZones(geojson, createNotificationWithToast, setActiveTab);
   });
 
   const createNotificationWithToast = (
-    type: "error" | "warning" | "info" | "success",
+    type: NotificationType,
     title: string,
     message: string,
     toastOptions: any = {}
@@ -60,28 +58,38 @@ function App() {
           />
         );
       case "zones":
-        return <ZonesScreen geodata={geodata} />;
+        return <ZonesScreen />;
       case "stats":
         return <StatsScreen geodata={geodata} />;
       case "profile":
         return <ProfileScreen />;
       default:
-        return <Map geodata={geodata} />;
+        return (
+          <Map
+            geodata={geodata}
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkAsRead={markAsRead}
+            onMarkAllAsRead={markAllAsRead}
+            onDelete={deleteNotification}
+          />
+        );
     }
   };
 
   return (
-    <div className="app">
+    <div className="app" style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Toaster position="top-center" richColors closeButton expand />
-      <div style={{ position: "fixed", top: "20px", right: "20px", zIndex: 9999 }}>
-        
-      </div>
 
-      <main className="main-content" style={{ paddingBottom: "80px" }}>
+      {/* Contenido principal ocupa todo el alto disponible */}
+      <main style={{ flex: 1, overflow: "hidden" }}>
         {renderContent()}
       </main>
 
-      <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Barra inferior fija */}
+      <div style={{ height: "60px" }}>
+        <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
     </div>
   );
 }

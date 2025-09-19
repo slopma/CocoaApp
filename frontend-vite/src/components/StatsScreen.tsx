@@ -1,193 +1,319 @@
-import React from 'react'
+import React, { useEffect, useState } from "react"
+import { supabase } from "../utils/SupabaseClient"
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
-const StatsScreen: React.FC = () => {
-  // Datos para el gráfico simple
-  const produccionData = [
-    { mes: 'Ene', valor: 30 },
-    { mes: 'Feb', valor: 25 },
-    { mes: 'Mar', valor: 40 },
-    { mes: 'Abr', valor: 35 },
-    { mes: 'May', valor: 50 },
-    { mes: 'Jun', valor: 45 }
-  ];
+// ----------------- Tipos -----------------
+interface EstadoCacao {
+  nombre: string
+}
 
-  const maxValor = Math.max(...produccionData.map(d => d.valor));
+
+interface Fruto {
+  fruto_id: string
+  especie: string
+  created_at: string
+  estado_cacao?: EstadoCacao
+}
+
+interface Arbol {
+  arbol_id: string
+  nombre: string
+  especie?: string
+  fruto: Fruto[]
+}
+
+interface Cultivo {
+  cultivo_id: string
+  nombre: string
+  arbol: Arbol[]
+}
+
+interface Lote {
+  lote_id: string
+  nombre: string
+  cultivo: Cultivo[]
+}
+
+interface Finca {
+  finca_id: string
+  nombre: string
+  created_at: string
+  lote: Lote[]
+}
+
+interface StatsScreenProps {
+  geodata: any; // puedes tiparlo mejor luego
+}
+
+
+// ----------------- Helpers -----------------
+const contarEstados = (fincas: any[]): Record<string, number> => {
+  const conteo: Record<string, number> = {}
+  const recorrer = (elemento: any) => {
+    if ("fruto_id" in elemento) {
+      const estado = elemento.estado_cacao?.nombre || "Desconocido"
+      conteo[estado] = (conteo[estado] || 0) + 1
+    } else if ("fruto" in elemento) {
+      elemento.fruto.forEach(recorrer)
+    } else if ("arbol" in elemento) {
+      elemento.arbol.forEach(recorrer)
+    } else if ("cultivo" in elemento) {
+      elemento.cultivo.forEach(recorrer)
+    } else if ("lote" in elemento) {
+      elemento.lote.forEach(recorrer)
+    }
+  }
+  fincas.forEach(recorrer)
+  return conteo
+}
+
+const contarEstructura = (fincas: Finca[]) => {
+  let fincasCount = fincas.length
+  let lotes = 0,
+    cultivos = 0,
+    arboles = 0,
+    frutos = 0
+
+  fincas.forEach((f) => {
+    lotes += f.lote.length
+    f.lote.forEach((l) => {
+      cultivos += l.cultivo.length
+      l.cultivo.forEach((c) => {
+        arboles += c.arbol.length
+        c.arbol.forEach((a) => {
+          frutos += a.fruto.length
+        })
+      })
+    })
+  })
+
+  return { fincas: fincasCount, lotes, cultivos, arboles, frutos }
+}
+
+// ----------------- Colores -----------------
+const COLORS: Record<string, string> = {
+  Enfermo: "#e74c3c",
+  Maduro: "#27ae60",
+  Inmaduro: "#3498db",
+  Transición: "#f1c40f",
+  Desconocido: "#7f8c8d",
+}
+
+// ----------------- Gráfico + Tabla -----------------
+const GraficoConTabla: React.FC<{ conteo: Record<string, number> }> = ({ conteo }) => {
+  const data = Object.entries(conteo).map(([estado, valor]) => ({
+    name: estado,
+    value: valor,
+  }))
+
+
+
 
   return (
-    <div style={{ 
-      padding: '20px', 
-      paddingBottom: '90px',
-      height: '100vh',
-      overflowY: 'auto',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <h2 style={{ 
-        marginBottom: '20px', 
-        color: '#333',
-        fontSize: '24px',
-        fontWeight: 'bold'
-      }}>
-        Estadísticas
-      </h2>
-      
-      {/* Tarjetas de resumen */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '12px',
-        marginBottom: '20px'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '16px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#4CAF50' }}>
-            205
-          </div>
-          <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
-            Total Frutos
-          </div>
-        </div>
-        
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '16px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#FF9800' }}>
-            7
-          </div>
-          <div style={{ fontSize: '14px', color: '#666', marginTop: '4px' }}>
-            Enfermedades
-          </div>
-        </div>
+    <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+      <div style={{ width: 250, height: 250 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" outerRadius={90} dataKey="value">
+              {data.map((entry, index) => (
+                <Cell key={index} fill={COLORS[entry.name] || "#ccc"} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
 
-      {/* Gráfico simple con CSS */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: '20px'
-      }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#333', fontSize: '18px' }}>
-          Producción Mensual
-        </h3>
-        <div style={{ 
-          height: '200px',
-          display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-around',
-          padding: '20px 10px 10px 10px'
-        }}>
-          {produccionData.map((item, index) => (
-            <div key={index} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              flex: 1,
-              maxWidth: '50px'
-            }}>
-              <div style={{
-                backgroundColor: '#4CAF50',
-                width: '30px',
-                height: `${(item.valor / maxValor) * 140}px`,
-                borderRadius: '4px 4px 0 0',
-                marginBottom: '8px',
-                position: 'relative',
-                transition: 'height 0.3s ease'
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '-25px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  fontSize: '12px',
-                  color: '#666',
-                  fontWeight: '500'
-                }}>
-                  {item.valor}
-                </div>
-              </div>
-              <div style={{
-                fontSize: '12px',
-                color: '#666',
-                fontWeight: '500'
-              }}>
-                {item.mes}
-              </div>
-            </div>
+      <table style={{ borderCollapse: "collapse", fontSize: "14px" }}>
+        <thead>
+          <tr>
+            <th style={{ border: "1px solid #ccc", padding: "6px" }}>Estado</th>
+            <th style={{ border: "1px solid #ccc", padding: "6px" }}>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={row.name}>
+              <td style={{ border: "1px solid #ccc", padding: "6px" }}>{row.name}</td>
+              <td style={{ border: "1px solid #ccc", padding: "6px" }}>{row.value}</td>
+            </tr>
           ))}
-        </div>
-      </div>
-
-      {/* Estado de salud */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{ margin: '0 0 16px 0', color: '#333', fontSize: '18px' }}>
-          Estado de Salud
-        </h3>
-        
-        <div style={{ marginBottom: '12px' }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            marginBottom: '6px' 
-          }}>
-            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Sanos</span>
-            <span style={{ fontSize: '14px', fontWeight: '500' }}>85%</span>
-          </div>
-          <div style={{
-            height: '8px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '4px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: '85%',
-              height: '100%',
-              backgroundColor: '#4CAF50',
-              borderRadius: '4px'
-            }} />
-          </div>
-        </div>
-
-        <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            marginBottom: '6px' 
-          }}>
-            <span style={{ fontSize: '14px', color: '#666' }}>Frutos Enfermos</span>
-            <span style={{ fontSize: '14px', fontWeight: '500' }}>15%</span>
-          </div>
-          <div style={{
-            height: '8px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '4px',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              width: '15%',
-              height: '100%',
-              backgroundColor: '#F44336',
-              borderRadius: '4px'
-            }} />
-          </div>
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
   )
+}
+
+// ----------------- Componente -----------------
+const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
+  void geodata; // evita warning TS6133
+
+  const [fincas, setFincas] = useState<Finca[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const [selectedFinca, setSelectedFinca] = useState<string>("")
+  const [selectedLote, setSelectedLote] = useState<string>("")
+
+  useEffect(() => {
+    const fetchFincas = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from("finca")
+        .select(`
+          finca_id,
+          nombre,
+          created_at,
+          lote (
+            lote_id,
+            nombre,
+            cultivo (
+              cultivo_id,
+              nombre,
+              arbol (
+                arbol_id,
+                nombre,
+                especie,
+                fruto (
+                  fruto_id,
+                  especie,
+                  created_at,
+                  estado_cacao (
+                    nombre
+                  )
+                )
+              )
+            )
+          )
+        `)
+
+      if (error) console.error("❌ Error cargando fincas:", error)
+      else setFincas(data || [])
+      setLoading(false)
+    }
+
+    fetchFincas()
+  }, [])
+
+  // Aplicar filtros
+  const filteredFincas = fincas
+    .filter((f) => (selectedFinca ? f.finca_id === selectedFinca : true))
+    .map((f) => ({
+      ...f,
+      lote: f.lote.filter((l) => (selectedLote ? l.lote_id === selectedLote : true)),
+    }))
+
+  // Recuentos
+  const conteoGeneral = contarEstados(filteredFincas)
+  const estructuraGeneral = contarEstructura(filteredFincas)
+
+return (
+  <div
+    style={{
+      padding: "20px",
+      paddingBottom: "90px",
+      backgroundColor: "#f5f5f5",
+      height: "100vh",          // pantalla completa
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    {/* 🔹 Header y filtros fijos */}
+    <div style={{ flex: "0 0 auto" }}>
+      <h2 style={{ marginBottom: "20px" }}>🌍 Mis Zonas</h2>
+
+      <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+        <select
+          value={selectedFinca}
+          onChange={(e) => {
+            setSelectedFinca(e.target.value)
+            setSelectedLote("")
+          }}
+        >
+          <option value="">Todas las fincas</option>
+          {fincas.map((f) => (
+            <option key={f.finca_id} value={f.finca_id}>
+              {f.nombre}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedLote}
+          onChange={(e) => setSelectedLote(e.target.value)}
+          disabled={!selectedFinca}
+        >
+          <option value="">Todos los lotes</option>
+          {fincas
+            .find((f) => f.finca_id === selectedFinca)
+            ?.lote.map((l) => (
+              <option key={l.lote_id} value={l.lote_id}>
+                {l.nombre}
+              </option>
+            ))}
+        </select>
+      </div>
+    </div>
+
+    {/* 🔹 Contenedor con scroll solo para las fincas */}
+    <div
+      style={{
+        flex: "1 1 auto",       // ocupa el resto del espacio
+        overflowY: "auto",      // scroll solo aquí
+        paddingRight: "10px",   // espacio para scrollbar
+      }}
+    >
+      {loading && <p>Cargando...</p>}
+
+      {!loading && (
+        <>
+          {/* General */}
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "10px",
+              marginBottom: "20px",
+            }}
+          >
+            <h3>📊 Resumen General</h3>
+            <GraficoConTabla conteo={conteoGeneral} />
+            <p>
+              Fincas: {estructuraGeneral.fincas} | Lotes: {estructuraGeneral.lotes} | Cultivos:{" "}
+              {estructuraGeneral.cultivos} | Árboles: {estructuraGeneral.arboles} | Frutos:{" "}
+              {estructuraGeneral.frutos}
+            </p>
+          </div>
+
+          {/* Por finca */}
+          {filteredFincas.map((finca) => {
+            const conteoFinca = contarEstados([finca])
+            const estructuraFinca = contarEstructura([finca])
+            return (
+              <div
+                key={finca.finca_id}
+                style={{
+                  background: "white",
+                  padding: "20px",
+                  borderRadius: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <h3>🏡 {finca.nombre}</h3>
+                <GraficoConTabla conteo={conteoFinca} />
+                <p>
+                  Lotes: {estructuraFinca.lotes} | Cultivos: {estructuraFinca.cultivos} | Árboles:{" "}
+                  {estructuraFinca.arboles} | Frutos: {estructuraFinca.frutos}
+                </p>
+              </div>
+            )
+          })}
+        </>
+      )}
+    </div>
+  </div>
+)
+
 }
 
 export default StatsScreen
