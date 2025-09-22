@@ -1,42 +1,32 @@
 // hooks/useCultivos.ts
 import { useEffect, useState } from "react";
-import { supabase } from "../utils/SupabaseClient";
-import type { Feature, FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
+import type { FeatureCollection, Geometry, GeoJsonProperties } from "geojson";
 
 export const useCultivos = () => {
-  const [cultivosData, setCultivosData] = useState<FeatureCollection | null>(null);
+  const [cultivosData, setCultivosData] = useState<FeatureCollection<Geometry, GeoJsonProperties> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCultivos = async () => {
-      const { data, error } = await supabase
-        .from("cultivo")
-        .select("cultivo_id, nombre, especie, poligono");
-
-      if (error) {
-        console.error("❌ Error cargando cultivos:", error);
-        return;
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:8000/cultivos");
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status}`);
+        }
+        const data: FeatureCollection<Geometry, GeoJsonProperties> = await res.json();
+        setCultivosData(data);
+      } catch (err: any) {
+        console.error("❌ Error cargando cultivos:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      const features: Feature<Geometry, GeoJsonProperties>[] = data.map((c): Feature<Geometry, GeoJsonProperties> => ({
-        type: "Feature",
-        geometry: c.poligono as Geometry,
-        properties: {
-          cultivo_id: c.cultivo_id,
-          nombre: c.nombre,
-          especie: c.especie,
-        },
-      }));
-
-      setCultivosData({
-        type: "FeatureCollection",
-        features,
-      });
     };
 
     fetchCultivos();
   }, []);
 
-  return { cultivosData };
+  return { cultivosData, loading, error };
 };
-
-

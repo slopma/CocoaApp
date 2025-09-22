@@ -10,7 +10,7 @@ import { setNotificationCallback } from "./utils/notifications";
 import { useGeoData } from "./hooks/useGeoData";
 import { analyzeZones } from "./utils/zoneAnalizer";
 import type { NotificationType } from "./hooks/useNotifications";
-import type { TabId } from "./config/tabs";
+import type { TabId } from "C:\Users\luisa\Documents\P2_CocoaApp_\backend\config\tabs.ts";
 import StatsScreen from "./screen/StatsScreen";
 import "leaflet/dist/leaflet.css";
 

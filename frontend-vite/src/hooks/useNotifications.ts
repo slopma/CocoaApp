@@ -13,60 +13,69 @@ export interface Notification {
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("finca-notifications");
-    if (saved) {
-      const parsedNotifications: Notification[] = JSON.parse(saved);
-      setNotifications(parsedNotifications);
-      setUnreadCount(parsedNotifications.filter((n) => !n.read).length);
-    }
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("http://localhost:8000/notifications");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setNotifications(data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("finca-notifications", JSON.stringify(notifications));
-    setUnreadCount(notifications.filter((n) => !n.read).length);
-  }, [notifications]);
-
-  const addNotification = (
+  const addNotification = async (
     notification: Omit<Notification, "id" | "timestamp" | "read">
   ) => {
-    const newNotification: Notification = {
-      id: `${Date.now()}-${Math.random()}`, // string id
+    const body = {
+      ...notification,
       timestamp: new Date().toISOString(),
       read: false,
-      ...notification,
     };
-    setNotifications((prev) => [newNotification, ...prev]);
-    return newNotification;
+
+    const res = await fetch("http://localhost:8000/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const newNotif = await res.json();
+    setNotifications((prev) => [newNotif, ...prev]);
+    return newNotif;
   };
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    await fetch(`http://localhost:8000/notifications/${id}/read`, {
+      method: "PUT",
+    });
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
   };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
+  const deleteNotification = async (id: string) => {
+    await fetch(`http://localhost:8000/notifications/${id}`, {
+      method: "DELETE",
+    });
     setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
-
-  const clearAll = () => {
-    setNotifications([]);
   };
 
   return {
     notifications,
-    unreadCount,
+    loading,
+    error,
     addNotification,
     markAsRead,
-    markAllAsRead,
     deleteNotification,
-    clearAll,
   };
 };

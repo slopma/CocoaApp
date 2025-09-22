@@ -1,37 +1,28 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../utils/SupabaseClient";
-import type { Lote } from "../types/db";
 
 export function useLotes() {
   const [lotesData, setLotesData] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLotes = async () => {
-      const { data, error } = await supabase.rpc("get_lotes_with_estado");
-      if (error) {
-        console.error("Error cargando lotes:", error);
-        return;
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:8000/lotes");
+        if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+        const geojson = await res.json();
+        setLotesData(geojson);
+      } catch (err: any) {
+        console.error("Error cargando lotes desde API:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      const geojson: GeoJSON.FeatureCollection = {
-        type: "FeatureCollection",
-        features: data.map((l: Lote) => ({
-          type: "Feature",
-          geometry: l.geometry,
-          properties: {
-            lote_id: l.lote_id,
-            nombre: l.nombre,
-            finca: l.finca,
-            estado: l.estado,
-          },
-        })),
-      };
-
-      setLotesData(geojson);
     };
 
     fetchLotes();
   }, []);
 
-  return { lotesData };
+  return { lotesData, loading, error };
 }

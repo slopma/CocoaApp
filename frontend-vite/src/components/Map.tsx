@@ -51,28 +51,12 @@ const Map: React.FC<MapProps> = ({
         zoom={17}
         style={{ height: "100%", width: "100%" }} // 👈 ahora 100% y App controla altura
       >
-        <LayersControl position="topright">
-          <BaseLayer name="🛰️ Esri Satélite">
-            <TileLayer
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              attribution="Tiles © Esri"
-            />
-          </BaseLayer>
-          <BaseLayer name="🗺️ Calles">
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap"
-            />
-          </BaseLayer>
-          <BaseLayer checked name="🌐 Híbrida">
             <TileLayer
               url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
               maxZoom={20}
               subdomains={["mt0", "mt1", "mt2", "mt3"]}
               attribution="© Google"
             />
-          </BaseLayer>
-        </LayersControl>
 
         {/* Lotes */}
         {lotesData && (
