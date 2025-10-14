@@ -1,0 +1,219 @@
+[
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63177085103203,
+    "latitude": 6.819934967364096
+  },
+  {
+    "voltaje": 0.14963,
+    "capacitancia": 13.50053,
+    "raw": 6630.5,
+    "longitude": -73.63168716040113,
+    "latitude": 6.819942573101234
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63302900981007,
+    "latitude": 6.822336644242834
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63336762150794,
+    "latitude": 6.823092860580648
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63072345937732,
+    "latitude": 6.822507305399713
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.62847824934,
+    "latitude": 6.823762726102407
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.62965525864225,
+    "latitude": 6.820831998655388
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63239372207559,
+    "latitude": 6.82242155711749
+  },
+  {
+    "voltaje": 0.242,
+    "capacitancia": 65.51649,
+    "raw": 30777.25,
+    "longitude": -73.63311545146514,
+    "latitude": 6.822435055493368
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63046886993885,
+    "latitude": 6.822449155078809
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63128004879988,
+    "latitude": 6.821973245095075
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.62937112174916,
+    "latitude": 6.822909451823059
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63165505398428,
+    "latitude": 6.817684555480737
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.62970617018397,
+    "latitude": 6.820884447879446
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63230294531557,
+    "latitude": 6.822334625042393
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.62863914756926,
+    "latitude": 6.819874153209817
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63138124841014,
+    "latitude": 6.821777162947603
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 69.37386,
+    "raw": 32767,
+    "longitude": -73.63075941343307,
+    "latitude": 6.822720002378301
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 42.64185,
+    "raw": 32767,
+    "longitude": -73.63317222808918,
+    "latitude": 6.821792475912478
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 54.38385,
+    "raw": 32767,
+    "longitude": -73.63076506806549,
+    "latitude": 6.821104876570377
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 54.38385,
+    "raw": 32767,
+    "longitude": -73.62949099124312,
+    "latitude": 6.822354404820294
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 54.38385,
+    "raw": 32767,
+    "longitude": -73.63305746037406,
+    "latitude": 6.81968371467103
+  },
+  {
+    "voltaje": 0.08771,
+    "capacitancia": 5.18084,
+    "raw": 8908.5,
+    "longitude": -73.62836803206079,
+    "latitude": 6.823691797657506
+  },
+  {
+    "voltaje": 0.16491,
+    "capacitancia": 17.71942,
+    "raw": 21080.75,
+    "longitude": -73.63050639341111,
+    "latitude": 6.82249654149076
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 42.64185,
+    "raw": 32767,
+    "longitude": -73.62932121638505,
+    "latitude": 6.822822626811717
+  },
+  {
+    "voltaje": 0.17819,
+    "capacitancia": 23.07531,
+    "raw": 21226,
+    "longitude": -73.6332588855476,
+    "latitude": 6.823111608050167
+  },
+  {
+    "voltaje": 0.10965,
+    "capacitancia": 0.008,
+    "raw": 14280.25,
+    "longitude": -73.62957199313449,
+    "latitude": 6.822359768293187
+  },
+  {
+    "voltaje": 0.158,
+    "capacitancia": 0.01649,
+    "raw": 3672.25,
+    "longitude": -73.63307235290907,
+    "latitude": 6.821753229954759
+  },
+  {
+    "voltaje": 0.23093,
+    "capacitancia": 6.46847,
+    "raw": 30011.5,
+    "longitude": -73.62935766265701,
+    "latitude": 6.823023286272978
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 8.62196,
+    "raw": 32767,
+    "longitude": -73.6292732671396,
+    "latitude": 6.822934625580852
+  },
+  {
+    "voltaje": 0.25599,
+    "capacitancia": 8.62196,
+    "raw": 32767,
+    "longitude": -73.63297506527172,
+    "latitude": 6.8195585830145315
+  }
+]

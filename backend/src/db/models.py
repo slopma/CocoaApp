@@ -30,3 +30,10 @@ class Arbol(BaseModel):
     ubicacion: Optional[Dict[str, Any]]  # GeoJSON Point
     estado_cacao_id: UUID
     frutos: List[Fruto] = []
+
+class Metrics(BaseModel):
+    latitude: float
+    longitude: float
+    raw: float | None = None
+    capacitancia: float | None = None
+    voltaje: float | None = None
