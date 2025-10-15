@@ -16,6 +16,22 @@
   z-index: 10000;
 }
 
+/* Responsive para móviles */
+@media (max-width: 480px) {
+  .notification-dropdown {
+    width: calc(100vw - 32px);
+    max-width: none;
+    right: -8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .notification-dropdown {
+    width: calc(100vw - 24px);
+    right: -4px;
+  }
+}
+
 /* Forzar modo oscuro */
 .dark-mode .notification-dropdown {
   background: #1f2937 !important;
@@ -42,6 +58,15 @@
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-secondary);
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Responsive para móviles */
+@media (max-width: 380px) {
+  .notification-header {
+    padding: 12px 16px;
+    gap: 8px;
+  }
 }
 
 .dark-mode .notification-header {
@@ -54,6 +79,20 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+/* Responsive para móviles */
+@media (max-width: 380px) {
+  .notification-header h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 340px) {
+  .notification-header h3 {
+    font-size: 14px;
+  }
 }
 
 .dark-mode .notification-header h3 {
@@ -65,19 +104,39 @@
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 11px;
-  padding: 6px 12px;
-  border-radius: 8px;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 10px;
   transition: all 0.2s ease;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: auto;
+  letter-spacing: 0.3px;
   white-space: nowrap;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex-shrink: 0;
+}
+
+/* Responsive para móviles pequeños */
+@media (max-width: 380px) {
+  .mark-all-read {
+    font-size: 11px;
+    padding: 6px 10px;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* Responsive para móviles muy pequeños */
+@media (max-width: 340px) {
+  .mark-all-read {
+    font-size: 10px;
+    padding: 6px 8px;
+    max-width: 120px;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
 }
 
 .mark-all-read:hover {

@@ -1,0 +1,86 @@
+/* Estilos para mejorar el responsivo de StatsScreen */
+
+/* Estilos para dispositivos móviles pequeños */
+@media (max-width: 640px) {
+  .stats-container {
+    padding: 12px !important;
+  }
+
+  .stats-header h2 {
+    font-size: 22px !important;
+  }
+
+  .stats-filters {
+    flex-direction: column !important;
+  }
+
+  .stats-filters select {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .stats-card {
+    padding: 16px !important;
+  }
+
+  .stats-metrics {
+    gap: 8px !important;
+  }
+
+  .stats-metric-item {
+    min-width: calc(33.333% - 8px) !important;
+  }
+}
+
+/* Estilos para tablets */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .stats-container {
+    padding: 16px !important;
+  }
+
+  .stats-metrics {
+    gap: 12px !important;
+  }
+}
+
+/* Estilos para desktop */
+@media (min-width: 1025px) {
+  .stats-container {
+    padding: 24px !important;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Scrollbar personalizado */
+.stats-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stats-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.stats-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.stats-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

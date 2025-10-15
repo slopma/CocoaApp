@@ -20,6 +20,7 @@ import "leaflet/dist/leaflet.css";
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>("map");
+  const [focusArbolId, setFocusArbolId] = useState<string | null>(null);
   
   // Hook de configuraciones para aplicar tema
   const { settings, loading: settingsLoading } = useSettings();
@@ -37,6 +38,16 @@ function App() {
   useEffect(() => {
     setNotificationCallback(settings.notifications ? addNotification : () => {});
   }, [addNotification, settings.notifications]);
+
+  // Resetear focusArbolId después de 2 segundos para permitir nuevos zooms
+  useEffect(() => {
+    if (focusArbolId) {
+      const timer = setTimeout(() => {
+        setFocusArbolId(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [focusArbolId]);
 
   // Re-ejecutar useGeoData cuando cambien las configuraciones
   useEffect(() => {
@@ -105,10 +116,14 @@ function App() {
             onMarkAsRead={markAsRead}
             onMarkAllAsRead={markAllAsRead}
             onDelete={deleteNotification}
+            focusArbolId={focusArbolId}
           />
         );
       case "zones":
-        return <ZonesScreen />;
+        return <ZonesScreen onNavigateToMap={(arbolId: string) => {
+          setFocusArbolId(arbolId);
+          setActiveTab("map");
+        }} />;
       case "stats":
         return <StatsScreen geodata={geodata} />;
       case "profile":

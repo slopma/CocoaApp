@@ -3,7 +3,7 @@ import type { TabId } from "../config/tabs";
 
 interface BottomNavItemProps {
   id: TabId;
-  icon: string;
+  icon: string; // Ahora será una URL de imagen
   label: string;
   active: boolean;
   onClick: (id: TabId) => void;
@@ -52,7 +52,16 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
         e.currentTarget.style.outline = "none";
       }}
     >
-      <div style={{ fontSize: "24px" }}>{icon}</div>
+      <img 
+        src={icon} 
+        alt={label}
+        style={{ 
+          width: "24px", 
+          height: "24px",
+          filter: active ? "none" : "grayscale(100%) opacity(0.5)",
+          transition: "filter 0.2s ease"
+        }} 
+      />
       <span style={{ fontSize: "10px", fontWeight: "500" }}>{label}</span>
     </button>
   );

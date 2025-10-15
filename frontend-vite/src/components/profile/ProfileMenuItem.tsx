@@ -44,7 +44,11 @@ const ProfileMenuItem: React.FC<ProfileMenuItemProps> = ({ icon, title, subtitle
         backgroundColor: danger ? "rgba(239, 68, 68, 0.1)" : "rgba(59, 130, 246, 0.1)",
         color: danger ? "var(--error)" : "var(--accent-blue)"
       }}>
-        {icon}
+        {typeof icon === 'string' && icon.endsWith('.png') ? (
+          <img src={icon} alt={title} style={{ width: "28px", height: "28px" }} />
+        ) : (
+          icon
+        )}
       </div>
       <div style={{ flex: 1 }}>
         <div

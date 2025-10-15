@@ -4,6 +4,7 @@ import ProfileStats from "../components/profile/ProfileStats"
 import ProfileMenu from "../components/profile/ProfileMenu"
 import SettingsScreen from "./SettingsScreen"
 import { useProfileStats } from "../hooks/useProfileStats"
+import ajustesIcon from "../utils/icons/ajustes.png"
 
 const ProfileScreen: React.FC = () => {
   const { stats, loading, error } = useProfileStats()
@@ -17,7 +18,7 @@ const ProfileScreen: React.FC = () => {
   ]
 
   const menuItems = [
-    { icon: "⚙️", title: "Configuración", subtitle: "Ajustes de la aplicación" },
+    { icon: ajustesIcon, title: "Configuración", subtitle: "Ajustes de la aplicación" },
     { icon: "📊", title: "Reportes", subtitle: "Descargar reportes detallados" },
     { icon: "❓", title: "Ayuda", subtitle: "Centro de soporte" },
     { icon: "🚪", title: "Cerrar Sesión", subtitle: "Salir de la aplicación" },
