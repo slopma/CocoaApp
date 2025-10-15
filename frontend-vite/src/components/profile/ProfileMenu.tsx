@@ -5,21 +5,52 @@ interface MenuItem {
   icon: string
   title: string
   subtitle: string
+  action?: () => void
 }
 
 interface ProfileMenuProps {
   items: MenuItem[]
+  onSettingsClick?: () => void
+  onReportsClick?: () => void
+  onHelpClick?: () => void
+  onLogoutClick?: () => void
 }
 
-const ProfileMenu: React.FC<ProfileMenuProps> = ({ items }) => {
+const ProfileMenu: React.FC<ProfileMenuProps> = ({ 
+  items, 
+  onSettingsClick,
+  onReportsClick,
+  onHelpClick,
+  onLogoutClick
+}) => {
+  const handleItemClick = (title: string) => {
+    switch (title) {
+      case "Configuración":
+        onSettingsClick?.();
+        break;
+      case "Reportes":
+        onReportsClick?.();
+        break;
+      case "Ayuda":
+        onHelpClick?.();
+        break;
+      case "Cerrar Sesión":
+        onLogoutClick?.();
+        break;
+      default:
+        console.log(`Clicked on: ${title}`);
+    }
+  };
+
   return (
     <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        overflow: "hidden",
-      }}
+           style={{
+             backgroundColor: "var(--card-bg)",
+             borderRadius: "20px",
+             boxShadow: "var(--shadow-lg)",
+             border: "2px solid var(--border-color)",
+             overflow: "hidden",
+           }}
     >
       {items.map((item, index) => (
         <ProfileMenuItem
@@ -28,6 +59,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ items }) => {
           title={item.title}
           subtitle={item.subtitle}
           danger={item.title === "Cerrar Sesión"}
+          onClick={() => handleItemClick(item.title)}
         />
       ))}
     </div>

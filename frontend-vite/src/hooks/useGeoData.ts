@@ -1,53 +1,37 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "../utils/SupabaseClient";
 
-export function useGeoData(onReady?: (geojson: any) => void) {
+export function useGeoData(onReady?: (analysis: any) => void, shouldFetch = true) {
   const [geodata, setGeoData] = useState<any>({
     type: "FeatureCollection",
     features: [],
   });
+  const [stats, setStats] = useState<any>(null);
   const hasAnalyzed = useRef(false);
 
   useEffect(() => {
-    const fetchLotes = async () => {
+    if (!shouldFetch) return;
+
+    const fetchZoneAnalysis = async () => {
       try {
-        const { data: lotes, error } = await supabase.rpc("get_lotes_with_estado");
-        if (error) {
-          throw error;
-        }
+        const res = await fetch("http://localhost:8000/zone-analysis");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json();
+        
+        setGeoData(data.geojson);
+        setStats(data.stats);
 
-        if (!lotes) {
-          console.warn("No se encontraron lotes.");
-          return;
-        }
-
-        const geojson = {
-          type: "FeatureCollection",
-          features: (lotes || []).map((lote: any) => ({
-            type: "Feature",
-            geometry: lote.geometry,
-            properties: {
-              lote_id: lote.lote_id,
-              nombre: lote.nombre,
-              finca: lote.finca_nombre || "Sin finca",
-              estado: lote.estado?.toLowerCase() || "",
-            },
-          })),
-        };
-
-        setGeoData(geojson);
-
-        if (!hasAnalyzed.current && onReady) {
-          onReady(geojson);
-          hasAnalyzed.current = true;
+        if (onReady) {
+          console.log("🔔 Ejecutando onReady");
+          onReady(data);
         }
       } catch (err) {
-        console.error("Error al cargar lotes desde Supabase:", err);
+        console.error("Error al cargar análisis de zonas:", err);
       }
     };
 
-    fetchLotes();
-  }, [onReady]);
+    fetchZoneAnalysis();
+  }, [shouldFetch]); // Depende de shouldFetch
 
-  return { geodata };
+  return { geodata, stats };
 }

@@ -31,15 +31,15 @@ const GraficoConTabla: React.FC<GraficoConTablaProps> = ({ conteo }) => {
       <table style={{ borderCollapse: "collapse", fontSize: "14px" }}>
         <thead>
           <tr>
-            <th style={{ border: "1px solid #ccc", padding: "6px" }}>Estado</th>
-            <th style={{ border: "1px solid #ccc", padding: "6px" }}>Cantidad</th>
+            <th style={{ border: "1px solid var(--border-color)", padding: "6px", backgroundColor: "var(--bg-secondary)", color: "var(--text-primary)" }}>Estado</th>
+            <th style={{ border: "1px solid var(--border-color)", padding: "6px", backgroundColor: "var(--bg-secondary)", color: "var(--text-primary)" }}>Cantidad</th>
           </tr>
         </thead>
         <tbody>
           {data.map((row) => (
             <tr key={row.name}>
-              <td style={{ border: "1px solid #ccc", padding: "6px" }}>{row.name}</td>
-              <td style={{ border: "1px solid #ccc", padding: "6px" }}>{row.value}</td>
+              <td style={{ border: "1px solid var(--border-color)", padding: "6px", color: "var(--text-primary)" }}>{row.name}</td>
+              <td style={{ border: "1px solid var(--border-color)", padding: "6px", color: "var(--text-primary)" }}>{row.value}</td>
             </tr>
           ))}
         </tbody>

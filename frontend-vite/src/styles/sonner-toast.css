@@ -1,0 +1,139 @@
+/* Estilos para Sonner Toast en modo oscuro */
+
+/* Toast container */
+[data-sonner-toaster] {
+  --normal-bg: var(--card-bg);
+  --normal-border: var(--border-color);
+  --normal-text: var(--text-primary);
+  --success-bg: var(--card-bg);
+  --success-border: var(--primary-green);
+  --success-text: var(--text-primary);
+  --info-bg: var(--card-bg);
+  --info-border: var(--accent-blue);
+  --info-text: var(--text-primary);
+  --warning-bg: var(--card-bg);
+  --warning-border: #f59e0b;
+  --warning-text: var(--text-primary);
+  --error-bg: var(--card-bg);
+  --error-border: var(--error);
+  --error-text: var(--text-primary);
+}
+
+/* Toast individual */
+[data-sonner-toast] {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Toast content */
+[data-sonner-toast] [data-content] {
+  color: var(--text-primary) !important;
+}
+
+/* Toast description */
+[data-sonner-toast] [data-description] {
+  color: var(--text-secondary) !important;
+}
+
+/* Toast title */
+[data-sonner-toast] [data-title] {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+/* Close button */
+[data-sonner-toast] [data-close-button] {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Action button */
+[data-sonner-toast] [data-button] {
+  background: var(--accent-blue) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background: var(--accent-blue-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+/* Toast types */
+[data-sonner-toast][data-type="success"] {
+  border-left: 4px solid var(--accent-blue) !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  border-left: 4px solid var(--accent-blue) !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  border-left: 4px solid #f59e0b !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  border-left: 4px solid var(--error) !important;
+}
+
+/* Icon colors */
+[data-sonner-toast] [data-icon] {
+  color: var(--text-primary) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--accent-blue) !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: var(--accent-blue) !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: #f59e0b !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--error) !important;
+}
+
+/* Forzar modo oscuro con clase específica */
+.dark-mode [data-sonner-toast] {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.dark-mode [data-sonner-toast] [data-content] {
+  color: #f9fafb !important;
+}
+
+.dark-mode [data-sonner-toast] [data-description] {
+  color: #d1d5db !important;
+}
+
+.dark-mode [data-sonner-toast] [data-title] {
+  color: #f9fafb !important;
+}
+
+.dark-mode [data-sonner-toast] [data-close-button] {
+  color: #9ca3af !important;
+}
+
+.dark-mode [data-sonner-toast] [data-close-button]:hover {
+  background: #374151 !important;
+  color: #f9fafb !important;
+}

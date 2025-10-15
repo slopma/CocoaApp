@@ -40,16 +40,16 @@ const Map: React.FC<MapProps> = ({
   const { cultivosData } = useCultivos();
   const { arbolesData, getNombreEstado } = useArboles();
   const [selectedArbol, setSelectedArbol] = useState<string | null>(null);
-  const [bellTopPx] = useState<number>(70);
 
   const fincaUnoPosition: [number, number] = [6.82091, -73.631639];
+
 
   return (
     <div style={{ height: "100%", width: "100%", position: "relative" }}>
       <MapContainer
         center={fincaUnoPosition}
         zoom={17}
-        style={{ height: "100%", width: "100%" }} // 👈 ahora 100% y App controla altura
+        style={{ height: "100%", width: "100%" }}
       >
             <TileLayer
               url="https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
@@ -95,18 +95,13 @@ const Map: React.FC<MapProps> = ({
       </MapContainer>
 
       {/* Campana */}
-      <div
-        className="notification-bell-container"
-        style={{ position: "absolute", top: bellTopPx, right: 10, zIndex: 2000 }}
-      >
-        <NotificationBell
-          notifications={notifications}
-          unreadCount={unreadCount}
-          onMarkAsRead={onMarkAsRead}
-          onMarkAllAsRead={onMarkAllAsRead}
-          onDelete={onDelete}
-        />
-      </div>
+      <NotificationBell
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAsRead={onMarkAsRead}
+        onMarkAllAsRead={onMarkAllAsRead}
+        onDelete={onDelete}
+      />
     </div>
   );
 };

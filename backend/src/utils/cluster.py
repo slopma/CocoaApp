@@ -1,4 +1,4 @@
-from supaBaseClient import supabase
+from src.db import supabase
 from sklearn.cluster import DBSCAN
 import numpy as np
 from shapely import MultiPolygon,Point
@@ -29,7 +29,11 @@ def insert_new_clusters(update_telemetry):
 
     #Asignar lote_id a cada punto nuevo
     for d in update_telemetry:
-        d["lote_id"], d["lote_nombre"] = get_lote_for_point(lotes, d["longitude"], d["latitude"])
+        lote_info = get_lote_for_point(lotes, d["longitude"], d["latitude"])
+        if lote_info:
+            d["lote_id"], d["lote_nombre"] = lote_info
+        else:
+            d["lote_id"], d["lote_nombre"] = None, "Sin lote"
 
     df = pd.DataFrame(update_telemetry)
     print("Datos procesados e inicializados")
@@ -71,7 +75,7 @@ def insert_new_clusters(update_telemetry):
         cluster_id = str(uuid.uuid4())
         cultivo = {
             "cultivo_id": cluster_id,
-            "nombre": f"{row["lote_nombre"]} - Cultivo {i}",
+            "nombre": f"{row["lote_nombre"]} - Cultivo {i+1}",
             "especie": "Cacao",
             "lote_id": row["lote_id"],
             "estado": True,
@@ -91,7 +95,7 @@ def insert_new_clusters(update_telemetry):
                 'crs': {'type': 'name', 'properties': {'name': 'EPSG:4326'}},
                 'coordinates': [row["geometry"].centroid.x, row["geometry"].centroid.y]
             },
-            "nombre": f"Arbol {i}" if i != -1 else "Sin_cluster",
+            "nombre": f"Arbol {i+1}" if i != -1 else "Sin_cluster",
             "especie": "CH13",
             "estado": True,
         }

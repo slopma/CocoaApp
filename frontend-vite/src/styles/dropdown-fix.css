@@ -1,0 +1,86 @@
+/* Fix para dropdowns - Forzar colores azules */
+
+/* Estilos globales para todos los selects */
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%236c757d" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 16px !important;
+  padding-right: 36px !important;
+}
+
+/* Forzar estilos para las opciones */
+select option {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  padding: 8px 12px !important;
+  border: none !important;
+}
+
+/* Hover y focus para opciones */
+select option:hover {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+}
+
+select option:checked {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+}
+
+select option:focus {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+}
+
+/* Modo oscuro específico */
+.dark-mode select option {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.dark-mode select option:hover {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+.dark-mode select option:checked,
+.dark-mode select option:focus {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Estilos específicos para WebKit (Chrome, Safari) */
+select::-webkit-scrollbar {
+  width: 8px;
+}
+
+select::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb {
+  background: var(--accent-blue);
+  border-radius: 4px;
+}
+
+select::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-blue-hover);
+}
+
+/* Forzar estilos para Firefox */
+@-moz-document url-prefix() {
+  select option {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+  }
+  
+  select option:hover {
+    background-color: var(--accent-blue) !important;
+    color: white !important;
+  }
+}

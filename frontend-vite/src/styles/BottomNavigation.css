@@ -6,6 +6,8 @@
   height: 60px;
   background: #fff;
   border-top: 1px solid #ddd;
+  border-radius: 0;
+  box-shadow: none;
   
   display: flex;            /* importante: flex container */
   flex-direction: row;      /* los items en fila */
@@ -21,5 +23,42 @@
   align-items: center;
   justify-content: center;
   flex: 1;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item:focus,
+.bottom-nav-item:active {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  outline: none !important;
+}
+
+/* Estilos globales para botones en la navegación inferior */
+.bottom-navigation button {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  outline: none !important;
+}
+
+.bottom-navigation button:hover,
+.bottom-navigation button:focus,
+.bottom-navigation button:active {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  outline: none !important;
 }
 

@@ -15,7 +15,13 @@ export const setNotificationCallback = (callback: (notification: any) => void) =
   addNotificationCallback = callback;
 };
 
-export const createZoneNotification = (type: string, data: any) => {
+export const createZoneNotification = (type: string, data: any, notificationsEnabled = true) => {
+  // Solo crear notificaciones si están habilitadas
+  if (!notificationsEnabled) {
+    console.log("🔔 Notificaciones deshabilitadas, saltando createZoneNotification");
+    return null;
+  }
+
   const notificationData = getNotificationData(type, data);
   
   // Guardar en el sistema de notificaciones

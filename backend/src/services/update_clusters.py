@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from utils.cluster import process_new_file
-from db.models import Metrics
+from src.utils.cluster import process_new_file
+from src.db.models import Metrics
 from typing import List
 
 router = APIRouter()

@@ -29,8 +29,28 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
         padding: "8px",
         flex: 1,
         minWidth: "60px",
+        border: "none",
+        borderRadius: "0",
+        backgroundColor: "transparent",
+        outline: "none",
       }}
       onClick={() => onClick(id)}  // ✅ Aquí se llama al callback con el id del tab
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.outline = "none";
+      }}
     >
       <div style={{ fontSize: "24px" }}>{icon}</div>
       <span style={{ fontSize: "10px", fontWeight: "500" }}>{label}</span>

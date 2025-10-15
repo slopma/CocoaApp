@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from utils.supaBaseClient import supabase
+from src.utils.supaBaseClient import supabase
 from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
@@ -9,7 +9,7 @@ async def get_lotes():
     try:
         response = await run_in_threadpool(lambda: supabase.rpc("get_lotes_with_estado").execute())
 
-        if response.error:
+        if hasattr(response, 'error') and response.error:
             raise HTTPException(status_code=500, detail=response.error.message)
 
         lotes = response.data or []

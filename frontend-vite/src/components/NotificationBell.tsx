@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/notification-bell.css";
 import "../styles/notification-dropdown.css";
 import "../styles/notification-footer.css";
@@ -31,6 +31,24 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
   onDelete,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const formatTime = (timestamp: string | number | Date): string => {
     const now = new Date();
@@ -67,7 +85,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
   };
 
   return (
-    <div className="notification-bell">
+    <div className="notification-bell" ref={dropdownRef}>
       <button className="bell-button" onClick={() => setIsOpen(!isOpen)}>
         🔔
         {unreadCount > 0 && (
@@ -106,9 +124,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
                   className={`notification-item ${
                     !notification.read ? "unread" : ""
                   }`}
-                  onClick={() =>
-                    !notification.read && onMarkAsRead(notification.id)
-                  }
                 >
                   <div className="notification-icon">
                     {getNotificationIcon(notification.type)}
@@ -122,15 +137,30 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
                       {formatTime(notification.timestamp)}
                     </span>
                   </div>
-                  <button
-                    className="delete-notification"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(notification.id);
-                    }}
-                  >
-                    ✕
-                  </button>
+                  <div className="notification-actions">
+                    {!notification.read && (
+                      <button
+                        className="mark-read-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onMarkAsRead(notification.id);
+                        }}
+                        title="Marcar como leída"
+                      >
+                        ✓
+                      </button>
+                    )}
+                    <button
+                      className="delete-notification"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(notification.id);
+                      }}
+                      title="Eliminar"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
               ))
             )}

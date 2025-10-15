@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from utils.supaBaseClient import supabase
+from src.db import supabase
 import math
 
 router = APIRouter()
@@ -26,19 +26,19 @@ async def get_arboles():
     try:
         # 1. Árboles con frutos
         arboles_res = supabase.rpc("get_arboles_with_frutos").execute()
-        if arboles_res.error:
+        if hasattr(arboles_res, 'error') and arboles_res.error:
             raise HTTPException(status_code=500, detail=arboles_res.error.message)
         arboles = arboles_res.data or []
 
         # 2. Cultivos
         cultivos_res = supabase.table("cultivo").select("cultivo_id, nombre, poligono").execute()
-        if cultivos_res.error:
+        if hasattr(cultivos_res, 'error') and cultivos_res.error:
             raise HTTPException(status_code=500, detail=cultivos_res.error.message)
         cultivos = cultivos_res.data or []
 
         # 3. Estados cacao
         estados_res = supabase.table("estado_cacao").select("estado_cacao_id, nombre").execute()
-        if estados_res.error:
+        if hasattr(estados_res, 'error') and estados_res.error:
             raise HTTPException(status_code=500, detail=estados_res.error.message)
         estados = {e["estado_cacao_id"]: e["nombre"] for e in estados_res.data or []}
 

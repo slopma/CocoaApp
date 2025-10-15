@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from db import supabase
+from src.db import supabase
 
 router = APIRouter()
 
@@ -8,7 +8,7 @@ async def get_cultivos():
     """Obtiene todos los cultivos en formato GeoJSON"""
     try:
         response = supabase.table("cultivo").select("cultivo_id, nombre, especie, poligono").execute()
-        if response.error:
+        if hasattr(response, 'error') and response.error:
             raise HTTPException(status_code=500, detail=response.error.message)
 
         features = [

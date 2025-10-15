@@ -10,11 +10,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar }) =>
   return (
     <div
       style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
+        backgroundColor: "var(--card-bg)",
+        borderRadius: "20px",
         padding: "24px",
         marginBottom: "20px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        boxShadow: "var(--shadow-lg)",
+        border: "2px solid var(--border-color)",
         textAlign: "center",
       }}
     >
@@ -22,7 +23,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar }) =>
         style={{
           width: "80px",
           height: "80px",
-          backgroundColor: "#E0E0E0",
+          backgroundColor: "var(--bg-secondary)",
           borderRadius: "50%",
           margin: "0 auto 16px",
           display: "flex",
@@ -33,10 +34,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar }) =>
       >
         {avatar || "👤"}
       </div>
-      <h2 style={{ margin: "0 0 8px 0", color: "#333", fontSize: "24px", fontWeight: "bold" }}>
+      <h2 style={{ margin: "0 0 8px 0", color: "var(--text-primary)", fontSize: "24px", fontWeight: "bold" }}>
         {name}
       </h2>
-      <p style={{ margin: "0 0 16px 0", color: "#666", fontSize: "16px" }}>{email}</p>
+      <p style={{ margin: "0 0 16px 0", color: "var(--text-secondary)", fontSize: "16px" }}>{email}</p>
     </div>
   )
 }

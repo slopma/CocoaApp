@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react"
-import { supabase } from "../utils/SupabaseClient";
-import { contarEstados, contarEstructura } from "../components/stats/helpers"
 import type { Finca } from "../types/domain"
 import GraficoConTabla from "../components/stats/GraficoConTabla"
 
@@ -8,65 +6,98 @@ interface StatsScreenProps {
   geodata: any
 }
 
+interface StatsResponse {
+  resumen_general: {
+    conteo: Record<string, number>
+    estructura: {
+      fincas: number
+      lotes: number
+      cultivos: number
+      arboles: number
+      frutos: number
+    }
+  }
+  por_finca: Array<{
+    finca_id: string
+    nombre: string
+    conteo: Record<string, number>
+    estructura: any
+  }>
+  fincas: Finca[]
+}
+
 const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
   void geodata
-  const [fincas, setFincas] = useState<Finca[]>([])
+  const [statsData, setStatsData] = useState<StatsResponse | null>(null)
+  const [fincasList, setFincasList] = useState<Array<{ finca_id: string; nombre: string }>>([])
+  const [lotesList, setLotesList] = useState<Array<{ lote_id: string; nombre: string }>>([])
   const [loading, setLoading] = useState(true)
   const [selectedFinca, setSelectedFinca] = useState<string>("")
   const [selectedLote, setSelectedLote] = useState<string>("")
 
   useEffect(() => {
     const fetchFincas = async () => {
-      setLoading(true)
-      const { data, error } = await supabase.from("finca").select(`
-        finca_id,
-        nombre,
-        created_at,
-        lote (
-          lote_id,
-          nombre,
-          cultivo (
-            cultivo_id,
-            nombre,
-            arbol (
-              arbol_id,
-              nombre,
-              especie,
-              fruto (
-                fruto_id,
-                especie,
-                created_at,
-                estado_cacao ( nombre )
-              )
-            )
-          )
-        )
-      `)
-
-      if (error) console.error("❌ Error cargando fincas:", error)
-      else setFincas(data || [])
-      setLoading(false)
+      const res = await fetch("http://localhost:8000/stats/fincas")
+      const data = await res.json()
+      setFincasList(data)
     }
-
     fetchFincas()
   }, [])
 
-  const filteredFincas = fincas
-    .filter((f) => (selectedFinca ? f.finca_id === selectedFinca : true))
-    .map((f) => ({
-      ...f,
-      lote: f.lote.filter((l) => (selectedLote ? l.lote_id === selectedLote : true)),
-    }))
+  useEffect(() => {
+    if (selectedFinca) {
+      const fetchLotes = async () => {
+        const res = await fetch(`http://localhost:8000/stats/lotes?finca_id=${selectedFinca}`)
+        const data = await res.json()
+        setLotesList(data)
+      }
+      fetchLotes()
+    } else {
+      setLotesList([])
+      setSelectedLote("")
+    }
+  }, [selectedFinca])
 
-  const conteoGeneral = contarEstados(filteredFincas)
-  const estructuraGeneral = contarEstructura(filteredFincas)
+  useEffect(() => {
+    const fetchStats = async () => {
+      setLoading(true)
+      try {
+        let url = "http://localhost:8000/stats"
+        const params = new URLSearchParams()
+        if (selectedFinca) params.append("finca_id", selectedFinca)
+        if (selectedLote) params.append("lote_id", selectedLote)
+        if (params.toString()) url += `?${params.toString()}`
+
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        
+        const data = await res.json()
+        setStatsData(data)
+      } catch (error) {
+        console.error("❌ Error cargando estadísticas:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [selectedFinca, selectedLote])
+
+  const conteoGeneral = statsData?.resumen_general.conteo || {}
+  const estructuraGeneral = statsData?.resumen_general.estructura || {
+    fincas: 0,
+    lotes: 0,
+    cultivos: 0,
+    arboles: 0,
+    frutos: 0,
+  }
 
   return (
     <div
       style={{
         padding: "20px",
         paddingBottom: "90px",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "var(--bg-secondary)",
         height: "100vh",
         display: "flex",
         flexDirection: "column",
@@ -74,7 +105,7 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
     >
       {/* Header + Filtros */}
       <div style={{ flex: "0 0 auto" }}>
-        <h2 style={{ marginBottom: "20px" }}>🌍 Mis Zonas</h2>
+        <h2 style={{ marginBottom: "20px", color: "var(--text-primary)", fontSize: "24px", fontWeight: "bold" }}>📊 Estadísticas</h2>
         <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
           <select
             value={selectedFinca}
@@ -82,9 +113,18 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
               setSelectedFinca(e.target.value)
               setSelectedLote("")
             }}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "12px",
+              border: "2px solid var(--border-color)",
+              backgroundColor: "var(--input-bg)",
+              color: "var(--text-primary)",
+              fontSize: "14px",
+              minWidth: "150px"
+            }}
           >
             <option value="">Todas las fincas</option>
-            {fincas.map((f) => (
+            {fincasList.map((f) => (
               <option key={f.finca_id} value={f.finca_id}>
                 {f.nombre}
               </option>
@@ -95,11 +135,19 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
             value={selectedLote}
             onChange={(e) => setSelectedLote(e.target.value)}
             disabled={!selectedFinca}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "12px",
+              border: "2px solid var(--border-color)",
+              backgroundColor: "var(--input-bg)",
+              color: "var(--text-primary)",
+              fontSize: "14px",
+              minWidth: "150px",
+              opacity: !selectedFinca ? 0.5 : 1
+            }}
           >
             <option value="">Todos los lotes</option>
-            {fincas
-              .find((f) => f.finca_id === selectedFinca)
-              ?.lote.map((l) => (
+            {lotesList.map((l) => (
                 <option key={l.lote_id} value={l.lote_id}>
                   {l.nombre}
                 </option>
@@ -110,35 +158,31 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
 
       {/* Contenido scrollable */}
       <div style={{ flex: "1 1 auto", overflowY: "auto", paddingRight: "10px" }}>
-        {loading && <p>Cargando...</p>}
+        {loading && <p style={{ color: "var(--text-secondary)", textAlign: "center", padding: "20px" }}>Cargando...</p>}
 
-        {!loading && (
+        {!loading && statsData && (
           <>
             {/* General */}
-            <div style={{ background: "white", padding: "20px", borderRadius: "10px", marginBottom: "20px" }}>
-              <h3>📊 Resumen General</h3>
+            <div style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "16px", marginBottom: "20px", border: "2px solid var(--border-color)", boxShadow: "var(--shadow)" }}>
+              <h3 style={{ color: "var(--text-primary)", marginBottom: "15px", fontSize: "18px", fontWeight: "700" }}>📊 Resumen General</h3>
               <GraficoConTabla conteo={conteoGeneral} />
-              <p>
+              <p style={{ color: "var(--text-secondary)", marginTop: "10px" }}>
                 Fincas: {estructuraGeneral.fincas} | Lotes: {estructuraGeneral.lotes} | Cultivos:{" "}
                 {estructuraGeneral.cultivos} | Árboles: {estructuraGeneral.arboles} | Frutos: {estructuraGeneral.frutos}
               </p>
             </div>
 
             {/* Por finca */}
-            {filteredFincas.map((finca) => {
-              const conteoFinca = contarEstados([finca])
-              const estructuraFinca = contarEstructura([finca])
-              return (
-                <div key={finca.finca_id} style={{ background: "white", padding: "20px", borderRadius: "10px", marginBottom: "20px" }}>
-                  <h3>🏡 {finca.nombre}</h3>
-                  <GraficoConTabla conteo={conteoFinca} />
-                  <p>
-                    Lotes: {estructuraFinca.lotes} | Cultivos: {estructuraFinca.cultivos} | Árboles:{" "}
-                    {estructuraFinca.arboles} | Frutos: {estructuraFinca.frutos}
+            {statsData.por_finca.map((finca) => (
+              <div key={finca.finca_id} style={{ background: "var(--card-bg)", padding: "20px", borderRadius: "16px", marginBottom: "20px", border: "2px solid var(--border-color)", boxShadow: "var(--shadow)" }}>
+                <h3 style={{ color: "var(--text-primary)", marginBottom: "15px", fontSize: "18px", fontWeight: "700" }}>🏡 {finca.nombre}</h3>
+                <GraficoConTabla conteo={finca.conteo} />
+                <p style={{ color: "var(--text-secondary)", marginTop: "10px" }}>
+                  Lotes: {finca.estructura.lotes} | Cultivos: {finca.estructura.cultivos} | Árboles:{" "}
+                  {finca.estructura.arboles} | Frutos: {finca.estructura.frutos}
                   </p>
                 </div>
-              )
-            })}
+            ))}
           </>
         )}
       </div>

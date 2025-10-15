@@ -1,34 +1,30 @@
-.notification-bell-container {
-  position: absolute;
-  top: 70px;
-  right: 10px;
-  transition: top 0.3s ease;
-}
-
-.notification-bell-container.shifted {
-  top: 160px;
+.notification-bell {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
 }
 
 .bell-button {
   position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
   font-size: 16px;
   cursor: pointer;
   padding: 10px;
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  color: #64748b;
+  box-shadow: var(--shadow);
+  color: var(--text-primary);
 }
 
 .bell-button:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-lg);
   transform: translateY(-1px);
-  color: #475569;
+  color: white;
 }
 
 .bell-button:active {
