@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export function useGeoData(onReady?: (analysis: any) => void, shouldFetch = true) {
   const [geodata, setGeoData] = useState<any>({
@@ -6,7 +6,6 @@ export function useGeoData(onReady?: (analysis: any) => void, shouldFetch = true
     features: [],
   });
   const [stats, setStats] = useState<any>(null);
-  const hasAnalyzed = useRef(false);
 
   useEffect(() => {
     if (!shouldFetch) return;
