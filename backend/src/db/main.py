@@ -7,11 +7,17 @@ app = FastAPI(title="CocoaApp API")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://54.227.24.240",
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "*",  # solo para pruebas
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Routers
 app.include_router(arboles.router, prefix="/arboles", tags=["Árboles"])

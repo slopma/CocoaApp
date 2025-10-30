@@ -23,7 +23,7 @@ export const useProfileStats = () => {
         setLoading(true);
         
         // Obtener estadísticas generales del backend
-        const res = await fetch("http://localhost:8000/stats/");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/stats/`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         
         const data = await res.json();

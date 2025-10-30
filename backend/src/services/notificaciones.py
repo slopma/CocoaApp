@@ -5,7 +5,8 @@ from datetime import datetime
 
 router = APIRouter()
 
-@router.get("/")
+
+@router.get("/") 
 async def get_notifications():
     """Obtiene todas las notificaciones"""
     try:
@@ -56,7 +57,7 @@ async def create_notification(notification: dict):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/test")
+@router.post("/test/")
 async def create_test_notification():
     """Crea una notificación de prueba"""
     # Primero, obtener un usuario existente de la base de datos
@@ -92,7 +93,7 @@ async def create_test_notification():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/{notif_id}/read")
+@router.put("/{notif_id}/read/")
 async def mark_as_read(notif_id: str):
     """Marca una notificación como leída"""
     try:
@@ -110,7 +111,7 @@ async def mark_as_read(notif_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/mark-all-read")
+@router.put("/mark-all-read/")
 async def mark_all_as_read():
     """Marca todas las notificaciones como leídas"""
     try:
@@ -128,7 +129,7 @@ async def mark_all_as_read():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{notif_id}")
+@router.delete("/{notif_id}/")
 async def delete_notification(notif_id: str):
     """Elimina una notificación"""
     try:

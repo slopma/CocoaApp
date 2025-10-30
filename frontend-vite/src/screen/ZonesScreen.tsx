@@ -61,17 +61,19 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
       setLoading(true)
       try {
         // Obtener árboles con frutos (mismos datos que el mapa)
-        const arbolesRes = await fetch("http://localhost:8000/arboles")
+        const arbolesRes = await fetch(`${import.meta.env.VITE_API_URL}/arboles/`)
         if (!arbolesRes.ok) throw new Error(`HTTP ${arbolesRes.status}`)
         const arbolesData = await arbolesRes.json()
         
         // Obtener cultivos para organizar por lotes
-        const cultivosRes = await fetch("http://localhost:8000/cultivos")
+        const cultivosRes = await fetch(`${import.meta.env.VITE_API_URL}/cultivos/`)
+      
         if (!cultivosRes.ok) throw new Error(`HTTP ${cultivosRes.status}`)
         const cultivosData = await cultivosRes.json()
         
         // Obtener lotes
-        const lotesRes = await fetch("http://localhost:8000/lotes")
+        const lotesRes = await fetch(`${import.meta.env.VITE_API_URL}/lotes/`)
+        
         if (!lotesRes.ok) throw new Error(`HTTP ${lotesRes.status}`)
         const lotesData = await lotesRes.json()
         

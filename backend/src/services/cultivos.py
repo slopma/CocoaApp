@@ -3,7 +3,8 @@ from src.db import supabase
 
 router = APIRouter()
 
-@router.get("/")
+
+@router.get("/") 
 async def get_cultivos():
     """Obtiene todos los cultivos en formato GeoJSON"""
     try:

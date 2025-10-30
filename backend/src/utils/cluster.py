@@ -75,7 +75,7 @@ def insert_new_clusters(update_telemetry):
         cluster_id = str(uuid.uuid4())
         cultivo = {
             "cultivo_id": cluster_id,
-            "nombre": f"{row["lote_nombre"]} - Cultivo {i+1}",
+            "nombre": f"{row['lote_nombre']} - Cultivo {i+1}",
             "especie": "Cacao",
             "lote_id": row["lote_id"],
             "estado": True,

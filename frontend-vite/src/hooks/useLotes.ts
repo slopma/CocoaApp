@@ -9,7 +9,7 @@ export function useLotes() {
     const fetchLotes = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:8000/lotes");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/lotes/`);
         if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
         const geojson = await res.json();
         setLotesData(geojson);

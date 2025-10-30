@@ -24,14 +24,10 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
-  };
+
 
   const getColorStyles = (color: string, variant: string) => {
-    const styles = {
+    const styles: Record<string, any> = {
       green: {
         primary: {
           backgroundColor: 'var(--primary-green)',

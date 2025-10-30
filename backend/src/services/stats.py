@@ -64,7 +64,9 @@ def contar_estructura(fincas: list) -> dict:
     }
 
 
-@router.get("/")
+
+
+@router.get("/") 
 async def get_stats(
     finca_id: Optional[str] = Query(None),
     lote_id: Optional[str] = Query(None)
@@ -142,7 +144,7 @@ async def get_stats(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/fincas")
+@router.get("/fincas/")
 async def get_fincas_list():
     """Obtiene lista simple de fincas para filtros"""
     try:
@@ -161,6 +163,7 @@ async def get_fincas_list():
 async def get_lotes_by_finca(finca_id: str = Query(...)):
     """Obtiene lotes de una finca específica"""
     try:
+        finca_id = finca_id.strip().strip("/")
         response = await run_in_threadpool(
             lambda: supabase.from_("lote")
             .select("lote_id, nombre")
@@ -175,7 +178,7 @@ async def get_lotes_by_finca(finca_id: str = Query(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/zones")
+@router.get("/zones/")
 async def get_zones_hierarchy():
     """Obtiene jerarquía completa para ZonesScreen"""
     try:
@@ -211,7 +214,7 @@ async def get_zones_hierarchy():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/metrics/{arbol_id}")
+@router.get("/metrics/{arbol_id}/")
 async def get_arbol_metrics(arbol_id: str):
     """Obtiene métricas de un árbol específico"""
     try:

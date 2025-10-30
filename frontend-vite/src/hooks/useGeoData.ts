@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export function useGeoData(onReady?: (analysis: any) => void, shouldFetch = true) {
   const [geodata, setGeoData] = useState<any>({
@@ -6,14 +6,13 @@ export function useGeoData(onReady?: (analysis: any) => void, shouldFetch = true
     features: [],
   });
   const [stats, setStats] = useState<any>(null);
-  const hasAnalyzed = useRef(false);
 
   useEffect(() => {
     if (!shouldFetch) return;
 
     const fetchZoneAnalysis = async () => {
       try {
-        const res = await fetch("http://localhost:8000/zone-analysis");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/zone-analysis/`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         
         const data = await res.json();

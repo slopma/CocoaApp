@@ -4,7 +4,8 @@ from starlette.concurrency import run_in_threadpool
 
 router = APIRouter()
 
-@router.get("/")
+
+@router.get("/") 
 async def get_lotes():
     try:
         response = await run_in_threadpool(lambda: supabase.rpc("get_lotes_with_estado").execute())

@@ -38,7 +38,7 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
 
   useEffect(() => {
     const fetchFincas = async () => {
-      const res = await fetch("http://localhost:8000/stats/fincas")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/stats/fincas/`)
       const data = await res.json()
       setFincasList(data)
     }
@@ -48,7 +48,8 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
   useEffect(() => {
     if (selectedFinca) {
       const fetchLotes = async () => {
-        const res = await fetch(`http://localhost:8000/stats/lotes?finca_id=${selectedFinca}`)
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/stats/lotes?finca_id=${selectedFinca}`)
+        
         const data = await res.json()
         setLotesList(data)
       }
@@ -63,7 +64,8 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
     const fetchStats = async () => {
       setLoading(true)
       try {
-        let url = "http://localhost:8000/stats"
+        let url = `${import.meta.env.VITE_API_URL}/stats/`
+
         const params = new URLSearchParams()
         if (selectedFinca) params.append("finca_id", selectedFinca)
         if (selectedLote) params.append("lote_id", selectedLote)
