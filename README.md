@@ -7,11 +7,13 @@ The system allows cocoa farmers, researchers, and managers to record data in the
 ## Project Description
 
 The application offers:
+- **User Authentication**: Secure login and registration with Supabase Auth
 - **Field data recording**: Fruit status (unripe, ripe, diseased), geographic location, and detailed metrics
 - **Interactive map**: Visualization of plots, crops, and trees on a georeferenced map (GeoJSON)
 - **Real-time alerts**: Automatic generation of notifications based on data analysis
 - **Zone management**: Hierarchical view of farms, lots, crops, trees, and fruits
 - **Statistics dashboard**: Comprehensive analytics and metrics
+- **User Profile**: Personalized profile with user statistics and settings
 - **Dark/Light theme**: Modern UI with theme switching
 - **Responsive design**: Works on desktop and mobile devices
 
@@ -78,7 +80,10 @@ Edit `backend/.env` with your Supabase project details:
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+VITE_API_URL=http://localhost:8000
 ```
+
+You can find these keys in your Supabase Dashboard under Settings > API.
 
 #### Start the backend server
 
@@ -109,14 +114,39 @@ Edit `.env.local` with your Supabase project details:
 
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
 VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+VITE_API_URL=http://localhost:8000
 ```
+
+You can find these keys in your Supabase Dashboard under Settings > API. The ANON_KEY is required for frontend authentication, while the SERVICE_ROLE_KEY is used by the backend for database operations.
 
 #### Start the frontend development server
 
 ```bash
 npm run dev
 ```
+
+The frontend will be available at `http://localhost:5173` (or the port shown in the terminal)
+
+### 4. Authentication Setup
+
+The application uses Supabase Authentication for user management. When you first run the application:
+
+1. **Register a new account**: Click "Regístrate" on the login screen and create an account with your email and password
+2. **Login**: Use your credentials to access the application
+3. **Profile**: Your profile information is automatically associated with your authenticated account
+
+**Note**: By default, Supabase may require email confirmation. For development, you can disable this in your Supabase Dashboard under Authentication > Email Auth settings.
+
+### 5. Running the Application
+
+Once both servers are running:
+
+1. Open your browser and navigate to `http://localhost:5173`
+2. You will see the login screen
+3. Register a new account or login with existing credentials
+4. After authentication, you'll have access to all application features
 
 ## API Endpoints
 
@@ -137,6 +167,8 @@ npm run dev
 ## Features Implemented
 
 ### Core Features
+- **User Authentication**: Secure login and registration system with Supabase Auth
+- **User Profiles**: Personalized profiles with user statistics and account management
 - **Interactive Map**: Satellite view with lot boundaries, crop areas, and tree markers
 - **Tree Management**: View individual trees with fruit status and metrics
 - **Zone Hierarchy**: Navigate through farms > lots > crops > trees > fruits
@@ -161,7 +193,7 @@ npm run dev
 - **TypeScript**: Full type safety in frontend
 - **Error Handling**: Comprehensive error handling and validation
 - **Performance**: Optimized queries and efficient data loading
-- **Security**: Supabase authentication and authorization
+- **Security**: Supabase authentication and authorization with user session management
 - **Scalability**: Modular architecture for easy expansion
 
 ## Development
@@ -203,16 +235,37 @@ npm run build
 
 ## Environment Variables
 
-Create a `.env` file in both `backend/` and `frontend-vite/` directories with the following variables:
+### Backend Environment Variables
+
+Create a `.env` file in the `backend/` directory:
 
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+VITE_API_URL=http://localhost:8000
 ```
+
+### Frontend Environment Variables
+
+Create a `.env.local` file in the `frontend-vite/` directory:
+
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+VITE_API_URL=http://localhost:8000
+```
+
+**Important Notes:**
+- The ANON_KEY is required for frontend authentication and should be used in client-side code
+- The SERVICE_ROLE_KEY is for backend operations and should never be exposed in client-side code
+- Both keys can be found in your Supabase Dashboard under Settings > API
+- Make sure to never commit these files to version control (they are already in .gitignore)
 
 ## Authors
 
 - [Luis Alejandro Castrillón](https://github.com/lacastrilp)
 - [Sara López Marín](https://github.com/slopma)
 - [Nicolás Ospina](https://github.com/niosto)
+- [Samuel Enrique Rivero](https://github.com/SamuelRivero50)
 - [Samuel Enrique Rivero](https://github.com/SamuelRivero50)

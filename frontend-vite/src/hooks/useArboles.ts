@@ -9,11 +9,18 @@ export function useArboles() {
   useEffect(() => {
     const fetchArboles = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/arboles/`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/arboles`);
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
+        }
         const json = await res.json();
-        setArbolesData(json.arboles);
+        console.log('✅ Árboles cargados:', json.arboles?.length || 0);
+        setArbolesData(json.arboles || []);
       } catch (err: any) {
+        console.error('❌ Error cargando árboles:', err);
         setError(err.message);
       } finally {
         setLoading(false);

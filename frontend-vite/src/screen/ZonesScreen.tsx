@@ -60,20 +60,20 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
     const fetchZonesData = async () => {
       setLoading(true)
       try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        
         // Obtener árboles con frutos (mismos datos que el mapa)
-        const arbolesRes = await fetch(`${import.meta.env.VITE_API_URL}/arboles/`)
+        const arbolesRes = await fetch(`${apiUrl}/arboles`)
         if (!arbolesRes.ok) throw new Error(`HTTP ${arbolesRes.status}`)
         const arbolesData = await arbolesRes.json()
         
         // Obtener cultivos para organizar por lotes
-        const cultivosRes = await fetch(`${import.meta.env.VITE_API_URL}/cultivos/`)
-      
+        const cultivosRes = await fetch(`${apiUrl}/cultivos`)
         if (!cultivosRes.ok) throw new Error(`HTTP ${cultivosRes.status}`)
         const cultivosData = await cultivosRes.json()
         
         // Obtener lotes
-        const lotesRes = await fetch(`${import.meta.env.VITE_API_URL}/lotes/`)
-        
+        const lotesRes = await fetch(`${apiUrl}/lotes`)
         if (!lotesRes.ok) throw new Error(`HTTP ${lotesRes.status}`)
         const lotesData = await lotesRes.json()
         
@@ -97,97 +97,106 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
     fetchZonesData()
   }, [])
 
-          // Función para organizar los datos en estructura jerárquica
+          // Función para organizar los datos en estructura jerárquica (usando IDs reales)
           const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData: any) => {
-            // Extraer datos de los formatos de respuesta
-            const arboles = arbolesData.arboles || []
-            const cultivos = cultivosData.features || []
-            const lotes = lotesData.features || []
-            
+            const arboles: any[] = arbolesData?.arboles || []
+            const cultivos: any[] = cultivosData?.features || []
+            const lotes: any[] = lotesData?.features || []
+
             console.log("📊 Datos recibidos:", {
               arboles: arboles.length,
-              cultivos: cultivos.length, 
-              lotes: lotes.length
+              cultivos: cultivos.length,
+              lotes: lotes.length,
             })
-            
-            // Crear mapas para acceso rápido
-            const cultivosMap = new Map()
+
+            // Mapear lotes por lote_id (normalizar IDs a string)
+            const lotesById = new Map<string, any>()
+            lotes.forEach((l: any) => {
+              const id = String(l?.properties?.lote_id || '').trim()
+              if (id) {
+                lotesById.set(id, {
+                  lote_id: id,
+                  nombre: l.properties.nombre,
+                  finca_id: "finca-yariguies",
+                  estado: l.properties.estado,
+                  cultivo: [],
+                })
+              }
+            })
+            console.log(`📍 Lotes mapeados: ${lotesById.size}`, Array.from(lotesById.keys()))
+
+            // Finca única (por ahora)
+            const finca = {
+              finca_id: "finca-yariguies",
+              nombre: "Finca Yariguies",
+              created_at: new Date().toISOString(),
+              lote: Array.from(lotesById.values()),
+            }
+
+            // Asignar cultivos por properties.lote_id (normalizar IDs)
+            let cultivosAsignados = 0
+            let cultivosSinLote = 0
             cultivos.forEach((c: any) => {
-              if (c.properties?.cultivo_id) {
-                cultivosMap.set(c.properties.cultivo_id, {
-                  cultivo_id: c.properties.cultivo_id,
+              const loteId = String(c?.properties?.lote_id || '').trim()
+              const lote = loteId ? lotesById.get(loteId) : null
+              if (lote) {
+                lote.cultivo.push({
+                  cultivo_id: String(c.properties.cultivo_id || '').trim(),
                   nombre: c.properties.nombre,
                   especie: c.properties.especie,
-                  lote_id: c.properties.nombre.split(' - ')[0].replace('Lote ', '') // Extraer número de lote del nombre
+                  arbol: [],
+                })
+                cultivosAsignados++
+              } else {
+                cultivosSinLote++
+                console.warn(`⚠️ Cultivo sin lote_id válido:`, {
+                  cultivo_id: c.properties?.cultivo_id,
+                  nombre: c.properties?.nombre,
+                  lote_id: c.properties?.lote_id,
+                  lote_id_normalizado: loteId,
+                  lotes_disponibles: Array.from(lotesById.keys())
                 })
               }
             })
-            
-            const lotesMap = new Map()
-            lotes.forEach((l: any) => {
-              if (l.properties?.lote_id) {
-                const loteNumero = l.properties.nombre.replace('Lote ', '')
-                lotesMap.set(loteNumero, {
-                  lote_id: l.properties.lote_id,
-                  nombre: l.properties.nombre,
-                  finca_id: "finca-yariguies", // Hardcodeado por ahora
-                  estado: l.properties.estado
+            console.log(`📦 Cultivos asignados: ${cultivosAsignados}, sin asignar: ${cultivosSinLote}`)
+
+            // Índice de cultivos (normalizar IDs)
+            const cultivosById = new Map<string, any>()
+            finca.lote.forEach((l: any) => l.cultivo.forEach((c: any) => {
+              const cultivoId = String(c.cultivo_id || '').trim()
+              if (cultivoId) cultivosById.set(cultivoId, c)
+            }))
+            console.log(`🌾 Cultivos indexados: ${cultivosById.size}`, Array.from(cultivosById.keys()).slice(0, 5))
+
+            // Asignar árboles a sus cultivos (normalizar IDs)
+            let arbolesAsignados = 0
+            let arbolesSinCultivo = 0
+            arboles.forEach((a: any) => {
+              const cultivoId = String(a.cultivo_id || '').trim()
+              const c = cultivoId ? cultivosById.get(cultivoId) : null
+              if (c) {
+                c.arbol.push(a)
+                arbolesAsignados++
+              } else {
+                arbolesSinCultivo++
+                console.warn(`⚠️ Árbol sin cultivo_id válido:`, {
+                  arbol_id: a.arbol_id,
+                  nombre: a.nombre,
+                  cultivo_id: a.cultivo_id,
+                  cultivo_id_normalizado: cultivoId,
+                  cultivos_disponibles: Array.from(cultivosById.keys()).slice(0, 5)
                 })
               }
             })
+            console.log(`🌳 Árboles asignados: ${arbolesAsignados}, sin asignar: ${arbolesSinCultivo}`)
             
-            // Agrupar árboles por cultivo
-            const arbolesPorCultivo = new Map<string, any[]>()
-            arboles.forEach((arbol: any) => {
-              const cultivoId = arbol.cultivo_id
-              if (!arbolesPorCultivo.has(cultivoId)) {
-                arbolesPorCultivo.set(cultivoId, [])
-              }
-              
-              // Usar los frutos reales del backend
-              const frutosReales = arbol.frutos || []
-              
-              arbolesPorCultivo.get(cultivoId)!.push({
-                ...arbol,
-                frutos: frutosReales
-              })
+            // Log de estructura final
+            finca.lote.forEach((l: any) => {
+              const totalArboles = l.cultivo.reduce((acc: number, c: any) => acc + (c.arbol?.length || 0), 0)
+              console.log(`📍 ${l.nombre}: ${l.cultivo.length} cultivos, ${totalArboles} árboles`)
             })
-            
-            // Agrupar cultivos por lote
-            const cultivosPorLote = new Map<string, any[]>()
-            cultivosMap.forEach((cultivo: any) => {
-              const loteNumero = cultivo.lote_id
-              if (!cultivosPorLote.has(loteNumero)) {
-                cultivosPorLote.set(loteNumero, [])
-              }
-              cultivosPorLote.get(loteNumero)!.push({
-                ...cultivo,
-                arbol: arbolesPorCultivo.get(cultivo.cultivo_id) || []
-              })
-            })
-            
-            // Crear estructura de fincas
-            const fincasMap = new Map<string, any>()
-            lotesMap.forEach((lote: any) => {
-              const fincaId = lote.finca_id
-              if (!fincasMap.has(fincaId)) {
-                fincasMap.set(fincaId, {
-                  finca_id: fincaId,
-                  nombre: "Finca Yariguíes",
-                  created_at: new Date().toISOString(),
-                  lote: []
-                })
-              }
-              
-              fincasMap.get(fincaId).lote.push({
-                ...lote,
-                cultivo: cultivosPorLote.get(lote.nombre.replace('Lote ', '')) || []
-              })
-            })
-            
-            const result = Array.from(fincasMap.values())
-            console.log("🏗️ Estructura organizada:", result)
-            return result
+
+            return [finca]
           }
 
   // Función para ordenar ascendente

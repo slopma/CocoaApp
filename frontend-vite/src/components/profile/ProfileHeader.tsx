@@ -4,9 +4,10 @@ interface ProfileHeaderProps {
   name: string
   email: string
   avatar?: string
+  onAvatarClick?: () => void
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar, onAvatarClick }) => {
   return (
     <div
       style={{
@@ -20,20 +21,98 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar }) =>
       }}
     >
       <div
+        onClick={onAvatarClick}
         style={{
-          width: "80px",
-          height: "80px",
+          width: "120px",
+          height: "120px",
           backgroundColor: "var(--bg-secondary)",
           borderRadius: "50%",
           margin: "0 auto 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "32px",
+          fontSize: "48px",
+          cursor: onAvatarClick ? "pointer" : "default",
+          overflow: "hidden",
+          border: onAvatarClick ? "3px solid var(--accent-blue)" : "2px solid var(--border-color)",
+          position: "relative",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          if (onAvatarClick) {
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.borderColor = "var(--accent-blue-hover)";
+            const overlay = e.currentTarget.querySelector(".avatar-overlay") as HTMLElement;
+            if (overlay) {
+              overlay.style.opacity = "1";
+            }
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (onAvatarClick) {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.borderColor = "var(--accent-blue)";
+            const overlay = e.currentTarget.querySelector(".avatar-overlay") as HTMLElement;
+            if (overlay) {
+              overlay.style.opacity = "0";
+            }
+          }
         }}
       >
-        {avatar || "👤"}
+        {avatar ? (
+          <img
+            src={avatar}
+            alt={name}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          />
+        ) : (
+          <span>👤</span>
+        )}
+        {onAvatarClick && (
+          <div
+            className="avatar-overlay"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 122, 255, 0.8)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "32px",
+              color: "white",
+              opacity: 0,
+              transition: "opacity 0.2s ease",
+              cursor: "pointer",
+            }}
+          >
+            📷
+          </div>
+        )}
       </div>
+      {onAvatarClick && (
+        <p
+          style={{
+            margin: "0 0 16px 0",
+            color: "var(--accent-blue)",
+            fontSize: "12px",
+            fontWeight: "500",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+          onClick={onAvatarClick}
+        >
+          Cambiar foto de perfil
+        </p>
+      )}
       <h2 style={{ margin: "0 0 8px 0", color: "var(--text-primary)", fontSize: "24px", fontWeight: "bold" }}>
         {name}
       </h2>

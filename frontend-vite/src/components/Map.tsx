@@ -36,10 +36,25 @@ const Map: React.FC<MapProps> = ({
   focusArbolId,
 }) => {
   void geodata;
-  const { lotesData } = useLotes();
-  const { cultivosData } = useCultivos();
-  const { arbolesData } = useArboles();
+  const { lotesData, loading: lotesLoading, error: lotesError } = useLotes();
+  const { cultivosData, loading: cultivosLoading, error: cultivosError } = useCultivos();
+  const { arbolesData, loading: arbolesLoading, error: arbolesError } = useArboles();
   const [selectedArbol, setSelectedArbol] = useState<string | null>(null);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('🗺️ Map state:', {
+      lotes: lotesData?.features?.length || 0,
+      cultivos: cultivosData?.features?.length || 0,
+      arboles: arbolesData?.length || 0,
+      lotesLoading,
+      cultivosLoading,
+      arbolesLoading,
+      lotesError,
+      cultivosError,
+      arbolesError,
+    });
+  }, [lotesData, cultivosData, arbolesData, lotesLoading, cultivosLoading, arbolesLoading, lotesError, cultivosError, arbolesError]);
 
   const fincaUnoPosition: [number, number] = [6.82091, -73.631639];
   
