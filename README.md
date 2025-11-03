@@ -129,17 +129,7 @@ npm run dev
 
 The frontend will be available at `http://localhost:5173` (or the port shown in the terminal)
 
-### 4. Authentication Setup
-
-The application uses Supabase Authentication for user management. When you first run the application:
-
-1. **Register a new account**: Click "Regístrate" on the login screen and create an account with your email and password
-2. **Login**: Use your credentials to access the application
-3. **Profile**: Your profile information is automatically associated with your authenticated account
-
-**Note**: By default, Supabase may require email confirmation. For development, you can disable this in your Supabase Dashboard under Authentication > Email Auth settings.
-
-### 5. Running the Application
+### 4. Running the Application
 
 Once both servers are running:
 
@@ -168,7 +158,8 @@ Once both servers are running:
 
 ### Core Features
 - **User Authentication**: Secure login and registration system with Supabase Auth
-- **User Profiles**: Personalized profiles with user statistics and account management
+- **User Profiles**: Personalized profiles with user statistics, avatar management, and account settings
+- **Profile Avatar**: Upload and manage profile pictures stored in Supabase Storage
 - **Interactive Map**: Satellite view with lot boundaries, crop areas, and tree markers
 - **Tree Management**: View individual trees with fruit status and metrics
 - **Zone Hierarchy**: Navigate through farms > lots > crops > trees > fruits
@@ -181,6 +172,14 @@ Once both servers are running:
 - **Modern UI**: Clean, professional interface with smooth animations
 - **Navigation**: Bottom navigation bar for easy access
 - **Settings**: Configurable app settings (theme, notifications, etc.)
+- **Profile Management**: Interactive profile page with avatar upload, user statistics, and account options
+
+### Profile Features
+- **User Information**: Display user name and email from authenticated account
+- **Activity Statistics**: View farms, fruits, zones, and trees counts
+- **Avatar Management**: Upload and manage profile pictures stored in Supabase Storage
+- **Account Settings**: Access app configuration and settings
+- **Logout**: Securely sign out from the application
 
 ### Data Features
 - **Geographic Data**: GeoJSON format for spatial visualization
