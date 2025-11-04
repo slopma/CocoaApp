@@ -3,18 +3,20 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #fff;
-  border-top: 1px solid #ddd;
+  height: 70px;
+  background: var(--card-bg);
+  border-top: 2px solid var(--border-color);
   border-radius: 0;
-  box-shadow: none;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   
-  display: flex;            /* importante: flex container */
-  flex-direction: row;      /* los items en fila */
-  justify-content: space-around; /* espacio igual entre botones */
-  align-items: center;      /* centra verticalmente los botones */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
 
   z-index: 2000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .bottom-nav-item {

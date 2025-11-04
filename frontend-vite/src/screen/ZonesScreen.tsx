@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
 import { estadoToIconUrl } from "../utils/mapIcons"
 
-// Icono de árbol de cacao desde Supabase
-const ARBOL_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cacao-icons/arbol-de-cacao.png"
+// Iconos desde Supabase
+const ARBOL_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/cacao-arbol.png"
+const FINCA_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/finca.png"
+const PIN_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/pin.png"
 
 // ----------------- Tipos (iguales a los del mapa) -----------------
 interface Fruto {
@@ -333,9 +335,21 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                   color: "var(--text-primary)",
                   fontSize: "18px",
                   fontWeight: "600",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
               >
-                🏡 {finca.nombre}
+                <img 
+                  src={FINCA_ICON_URL} 
+                  alt="Finca"
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    objectFit: "contain",
+                  }}
+                />
+                {finca.nombre}
               </h3>
               <p style={{ margin: 0, fontSize: "14px", color: "var(--text-secondary)" }}>
                 Creada: {new Date(finca.created_at).toLocaleDateString()}
@@ -396,8 +410,24 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "16px", fontWeight: "500", color: "var(--text-primary)" }}>
-                        📍 {lote.nombre}
+                      <span style={{ 
+                        fontSize: "16px", 
+                        fontWeight: "500", 
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
+                      }}>
+                        <img 
+                          src={PIN_ICON_URL} 
+                          alt="Pin"
+                          style={{
+                            width: "16px",
+                            height: "16px",
+                            objectFit: "contain",
+                          }}
+                        />
+                        {lote.nombre}
                       </span>
                       {isLote1 && (
                         <span style={{ 

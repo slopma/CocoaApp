@@ -7,7 +7,7 @@ import { useProfileStats } from "../hooks/useProfileStats"
 import { useAuth } from "../hooks/useAuth"
 import { useAvatar } from "../hooks/useAvatar"
 import { toast } from "sonner"
-import ajustesIcon from "../utils/icons/ajustes.png"
+const ajustesIcon = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/ajustes.png";
 
 const ProfileScreen: React.FC = () => {
   const { stats, loading, error } = useProfileStats()

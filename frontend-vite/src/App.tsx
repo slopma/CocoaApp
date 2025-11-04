@@ -30,6 +30,17 @@ function App() {
   // Hook de configuraciones para aplicar tema
   const { settings, loading: settingsLoading } = useSettings();
 
+  // Cambiar el título del documento según la pestaña activa
+  useEffect(() => {
+    const titles: Record<TabId, string> = {
+      map: "Cocoa App - Inicio",
+      zones: "Cocoa App - Zonas",
+      stats: "Cocoa App - Estadísticas",
+      profile: "Cocoa App - Perfil",
+    };
+    document.title = titles[activeTab] || "Cocoa App";
+  }, [activeTab]);
+
   const {
     notifications,
     unreadCount,
@@ -226,7 +237,7 @@ function App() {
       <main style={{ 
         flex: 1, 
         overflow: "auto", 
-        paddingBottom: "60px",
+        paddingBottom: "70px",
         backgroundColor: "var(--bg-primary)"
       }}>
         {renderContent()}
