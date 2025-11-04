@@ -3,21 +3,21 @@ import L from "leaflet";
 
 // 🔹 Base pública de tu bucket en Supabase
 const supabaseBaseUrl =
-  "https://zlkdxzfxkhohlpswdmap.storage.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cacao-icons";
+  "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/";
 
 // 🔹 Icono fijo para árboles
 export const ArbolIcon = L.icon({
-  iconUrl: `${supabaseBaseUrl}/arbol-de-cacao.png`,
+  iconUrl: `${supabaseBaseUrl}/cacao-arbol.png`,
   iconSize: [28, 28],
   iconAnchor: [14, 28],
 });
 
 // 🔹 Mapear estado del fruto a ícono
 export const estadoToIconUrl: Record<string, string> = {
-  inmaduro: `${supabaseBaseUrl}/Caco-Inmaduro.png`,
-  transición: `${supabaseBaseUrl}/Cacao-en-Transicion.png`,
-  maduro: `${supabaseBaseUrl}/Cacao-maduro.png`,
-  enfermo: `${supabaseBaseUrl}/Cacao-Enfermo.png`,
+  inmaduro: `${supabaseBaseUrl}/azul.png`,
+  transición: `${supabaseBaseUrl}/amarillo.png`,
+  maduro: `${supabaseBaseUrl}/verde.png`,
+  enfermo: `${supabaseBaseUrl}/rojo.png`,
 };
 
 // 🔹 Retorna ícono de fruto según estado

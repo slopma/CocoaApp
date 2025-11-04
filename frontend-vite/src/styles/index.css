@@ -11,6 +11,7 @@
   --text-muted: #9ca3af;
   --border-color: #e5e7eb;
   --card-bg: #ffffff;
+  --card-bg-rgb: 255, 255, 255;
   --input-bg: #ffffff;
   --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);

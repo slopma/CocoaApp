@@ -8,11 +8,14 @@ import Map from "./components/Map";
 import BottomNavigation from "./components/BottomNavigation";
 import ZonesScreen from "./screen/ZonesScreen";
 import ProfileScreen from "./screen/ProfileScreen";
+import LoginScreen from "./screen/LoginScreen";
+import RegisterScreen from "./screen/RegisterScreen";
 import { Toaster, toast } from "sonner";
 import { useNotifications } from "./hooks/useNotifications";
 import { setNotificationCallback } from "./utils/notifications";
 import { useGeoData } from "./hooks/useGeoData";
 import { useSettings } from "./hooks/useSettings";
+import { useAuth } from "./hooks/useAuth";
 import type { NotificationType } from "./hooks/useNotifications";
 import type { TabId } from "./config/tabs";
 import StatsScreen from "./screen/StatsScreen";
@@ -21,9 +24,22 @@ import "leaflet/dist/leaflet.css";
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>("map");
   const [focusArbolId, setFocusArbolId] = useState<string | null>(null);
+  const [authView, setAuthView] = useState<"login" | "register">("login");
+  const { isAuthenticated, loading: authLoading } = useAuth();
   
   // Hook de configuraciones para aplicar tema
   const { settings, loading: settingsLoading } = useSettings();
+
+  // Cambiar el título del documento según la pestaña activa
+  useEffect(() => {
+    const titles: Record<TabId, string> = {
+      map: "Cocoa App - Inicio",
+      zones: "Cocoa App - Zonas",
+      stats: "Cocoa App - Estadísticas",
+      profile: "Cocoa App - Perfil",
+    };
+    document.title = titles[activeTab] || "Cocoa App";
+  }, [activeTab]);
 
   const {
     notifications,
@@ -105,6 +121,54 @@ function App() {
     return toastFn(validMessage, toastOptions);
   };
 
+  // Mostrar login/registro si no hay sesión
+  if (authLoading) {
+    return (
+      <div 
+        style={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          height: "100vh",
+          backgroundColor: "var(--bg-secondary)",
+        }}
+      >
+        <p style={{ color: "var(--text-secondary)", fontSize: "16px" }}>Cargando...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div 
+        style={{ 
+          height: "100vh",
+          backgroundColor: "var(--bg-secondary)",
+        }}
+      >
+        <Toaster 
+          position="top-center" 
+          richColors 
+          closeButton 
+          expand 
+          theme={settings.theme}
+          toastOptions={{
+            style: {
+              background: 'var(--card-bg)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-primary)',
+            },
+          }}
+        />
+        {authView === "login" ? (
+          <LoginScreen onSwitchToRegister={() => setAuthView("register")} />
+        ) : (
+          <RegisterScreen onSwitchToLogin={() => setAuthView("login")} />
+        )}
+      </div>
+    );
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case "map":
@@ -173,7 +237,7 @@ function App() {
       <main style={{ 
         flex: 1, 
         overflow: "auto", 
-        paddingBottom: "60px",
+        paddingBottom: "70px",
         backgroundColor: "var(--bg-primary)"
       }}>
         {renderContent()}

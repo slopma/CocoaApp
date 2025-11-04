@@ -106,24 +106,33 @@ export const useNotifications = () => {
   };
 
   const markAllAsRead = async () => {
+    console.log("🔔 Marking all notifications as read");
+    
+    // Guardar estado original por si necesitamos revertir
+    const originalNotifications = [...notifications];
+    
     try {
-      // Marcar todas como leídas localmente
+      // Marcar todas como leídas localmente primero (optimistic update)
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       
-      // Usar el endpoint optimizado para marcar todas como leídas
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/notifications/mark-all-read/`, {
-        method: "PUT",
-      });
+      // Intentar marcar las notificaciones del backend
+      const backendNotifications = notifications.filter(n => !n.id.startsWith("local_"));
       
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      if (backendNotifications.length > 0) {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/notifications/mark-all-read/`, {
+          method: "PUT",
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
       }
       
-      console.log("🔔 All notifications marked as read");
+      console.log("🔔 All notifications marked as read successfully");
     } catch (err: any) {
       console.error("🔔 Error marking all as read:", err);
-      // Revertir cambios locales si falla
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: false })));
+      // Revertir a estado original si falla
+      setNotifications(originalNotifications);
     }
   };
 

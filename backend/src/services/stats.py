@@ -73,62 +73,118 @@ async def get_stats(
 ):
     """Obtiene estadísticas completas con filtros opcionales"""
     try:
-        # Query base
-        query = supabase.from_("finca").select("""
-            finca_id,
-            nombre,
-            created_at,
-            lote (
-                lote_id,
-                nombre,
-                cultivo (
-                    cultivo_id,
-                    nombre,
-                    arbol (
-                        arbol_id,
-                        nombre,
-                        especie,
-                        fruto (
-                            fruto_id,
-                            especie,
-                            created_at,
-                            estado_cacao ( nombre )
-                        )
-                    )
-                )
-            )
-        """)
-
-        # Aplicar filtros
+        import re
+        
+        # 1. Contar fincas
+        fincas_query = supabase.from_("finca").select("finca_id, nombre")
         if finca_id:
-            query = query.eq("finca_id", finca_id)
+            fincas_query = fincas_query.eq("finca_id", finca_id)
+        fincas_resp = await run_in_threadpool(lambda: fincas_query.execute())
+        fincas_count = len(fincas_resp.data or [])
+        
+        # 2. Contar zonas (lotes con polígono)
+        zonas_query = supabase.from_("lote").select("lote_id, nombre, poligono").not_.is_("poligono", None)
+        if finca_id:
+            zonas_query = zonas_query.eq("finca_id", finca_id)
+        zonas_resp = await run_in_threadpool(lambda: zonas_query.execute())
+        zonas = zonas_resp.data or []
+        zonas_count = len(zonas)
+        
+        # 3. Crear mapa de nombres de zonas para mapear cultivos
+        nombre_a_zona_id = {}
+        for zona in zonas:
+            nombre = zona.get("nombre", "")
+            zona_id = zona.get("lote_id")
+            if nombre and zona_id:
+                variantes = {
+                    nombre,
+                    re.sub(r"^Zona\s+", "Lote ", nombre),
+                    re.sub(r"^Lote\s+", "Zona ", nombre),
+                }
+                for v in variantes:
+                    if v and v not in nombre_a_zona_id:
+                        nombre_a_zona_id[v] = zona_id
+        
+        # 4. Obtener todos los cultivos y mapearlos a zonas
+        cultivos_query = supabase.from_("cultivo").select("cultivo_id, nombre, lote_id").eq("estado", True)
+        cultivos_resp = await run_in_threadpool(lambda: cultivos_query.execute())
+        cultivos = cultivos_resp.data or []
+        
+        # Mapear cultivos a zonas por nombre
+        cultivos_mapeados = set()
+        for cultivo in cultivos:
+            nombre_cultivo = cultivo.get("nombre", "")
+            prefijo = re.sub(r"\s+-\s+.*$", "", nombre_cultivo).strip()
+            zona_id = nombre_a_zona_id.get(prefijo) or nombre_a_zona_id.get(re.sub(r"^Lote\s+", "Zona ", prefijo)) or nombre_a_zona_id.get(re.sub(r"^Zona\s+", "Lote ", prefijo))
+            if zona_id:
+                cultivos_mapeados.add(cultivo.get("cultivo_id"))
+        
+        cultivos_count = len(cultivos_mapeados)
+        
+        # 5. Contar TODOS los árboles activos (no solo los de cultivos mapeados)
+        arboles_query = supabase.from_("arbol").select("arbol_id, cultivo_id").eq("estado", True)
+        arboles_resp = await run_in_threadpool(lambda: arboles_query.execute())
+        arboles_count = len(arboles_resp.data or [])
+        
+        # 6. Contar TODOS los frutos de TODOS los árboles activos
+        arboles_ids = [a.get("arbol_id") for a in (arboles_resp.data or []) if a.get("arbol_id")]
+        frutos_count = 0
+        if arboles_ids:
+            # Contar todos los frutos de todos los árboles activos
+            frutos_query = supabase.from_("fruto").select("fruto_id").in_("arbol_id", arboles_ids)
+            frutos_data = await run_in_threadpool(lambda: frutos_query.execute())
+            frutos_count = len(frutos_data.data or [])
+        
+        # 7. Contar estados de TODOS los frutos (incluyendo todos los estados)
+        conteo_general = {}
+        if arboles_ids:
+            frutos_estados_resp = await run_in_threadpool(
+                lambda: supabase.from_("fruto")
+                .select("fruto_id, estado_fruto, estado_cacao(nombre)")
+                .in_("arbol_id", arboles_ids)
+                .execute()
+            )
+            for fruto in (frutos_estados_resp.data or []):
+                estado = "Desconocido"
+                if isinstance(fruto.get("estado_cacao"), dict):
+                    estado = fruto.get("estado_cacao", {}).get("nombre", "Desconocido")
+                elif fruto.get("estado_fruto"):
+                    # Si no hay relación, intentar obtener el estado directamente
+                    estado_uuid = fruto.get("estado_fruto")
+                    if estado_uuid:
+                        try:
+                            estado_resp = await run_in_threadpool(
+                                lambda: supabase.from_("estado_cacao")
+                                .select("nombre")
+                                .eq("estado_cacao_id", estado_uuid)
+                                .single()
+                                .execute()
+                            )
+                            if estado_resp.data:
+                                estado = estado_resp.data.get("nombre", "Desconocido")
+                        except:
+                            estado = "Desconocido"
+                conteo_general[estado] = conteo_general.get(estado, 0) + 1
+        
+        estructura_general = {
+            "fincas": fincas_count,
+            "lotes": zonas_count,  # Zonas con polígono
+            "cultivos": cultivos_count,
+            "arboles": arboles_count,
+            "frutos": frutos_count,
+        }
 
-        response = await run_in_threadpool(lambda: query.execute())
-
-        if hasattr(response, 'error') and response.error:
-            raise HTTPException(status_code=500, detail=response.error.message)
-
-        fincas = response.data or []
-
-        # Filtrar lote si se especifica
-        if lote_id:
-            for finca in fincas:
-                finca["lote"] = [l for l in finca.get("lote", []) if l["lote_id"] == lote_id]
-
-        # Calcular estadísticas
-        conteo_general = contar_estados(fincas)
-        estructura_general = contar_estructura(fincas)
-
-        # Estadísticas por finca
+        # Estadísticas por finca (simplificado para el nuevo enfoque)
         stats_por_finca = []
-        for finca in fincas:
-            conteo_finca = contar_estados([finca])
-            estructura_finca = contar_estructura([finca])
+        fincas_data = fincas_resp.data or []
+        for finca in fincas_data:
+            # Para cada finca, usar las mismas estadísticas generales por ahora
+            # (en el futuro se puede optimizar para contar por finca específica)
             stats_por_finca.append({
-                "finca_id": finca["finca_id"],
-                "nombre": finca["nombre"],
-                "conteo": conteo_finca,
-                "estructura": estructura_finca,
+                "finca_id": finca.get("finca_id"),
+                "nombre": finca.get("nombre"),
+                "conteo": conteo_general,
+                "estructura": estructura_general,
             })
 
         return {
@@ -137,7 +193,7 @@ async def get_stats(
                 "estructura": estructura_general,
             },
             "por_finca": stats_por_finca,
-            "fincas": fincas,
+            "fincas": fincas_data,
         }
 
     except Exception as e:

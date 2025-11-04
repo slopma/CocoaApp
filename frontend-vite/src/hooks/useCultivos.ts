@@ -10,12 +10,15 @@ export const useCultivos = () => {
   useEffect(() => {
     const fetchCultivos = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/cultivos/`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${apiUrl}/cultivos`);
         if (!res.ok) {
-          throw new Error(`Error HTTP ${res.status}`);
+          throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
         }
         const data: FeatureCollection<Geometry, GeoJsonProperties> = await res.json();
+        console.log('✅ Cultivos cargados:', data.features?.length || 0);
         setCultivosData(data);
       } catch (err: any) {
         console.error("❌ Error cargando cultivos:", err);

@@ -1,14 +1,20 @@
-import React, { useState } from "react"
+import React, { useState, useRef } from "react"
 import ProfileHeader from "../components/profile/ProfileHeader"
 import ProfileStats from "../components/profile/ProfileStats"
 import ProfileMenu from "../components/profile/ProfileMenu"
 import SettingsScreen from "./SettingsScreen"
 import { useProfileStats } from "../hooks/useProfileStats"
-import ajustesIcon from "../utils/icons/ajustes.png"
+import { useAuth } from "../hooks/useAuth"
+import { useAvatar } from "../hooks/useAvatar"
+import { toast } from "sonner"
+const ajustesIcon = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/ajustes.png";
 
 const ProfileScreen: React.FC = () => {
   const { stats, loading, error } = useProfileStats()
+  const { authUser, signOut, refreshUser } = useAuth()
+  const { uploadAvatar, deleteAvatar, uploading } = useAvatar()
   const [currentView, setCurrentView] = useState<'profile' | 'settings'>('profile')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const statsData = [
     { value: stats.fincas, label: "Fincas", color: "#007AFF" },
@@ -43,10 +49,41 @@ const ProfileScreen: React.FC = () => {
     // TODO: Implementar pantalla de ayuda
   }
 
-  const handleLogoutClick = () => {
-    console.log('🚪 Logout clicked')
-    // TODO: Implementar logout
-    alert('Función de cerrar sesión en desarrollo')
+  const handleLogoutClick = async () => {
+    try {
+      const { error } = await signOut()
+      if (error) {
+        toast.error(error.message || "Error al cerrar sesión")
+      } else {
+        toast.success("Sesión cerrada exitosamente")
+      }
+    } catch (err) {
+      toast.error("Error al cerrar sesión")
+    }
+  }
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !authUser?.id) {
+      return
+    }
+
+    const avatarUrl = await uploadAvatar(authUser.id, file)
+    
+    // Resetear el input para permitir seleccionar el mismo archivo nuevamente
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+
+    // Actualizar el avatar localmente si se subió exitosamente
+    if (avatarUrl) {
+      // Refrescar el usuario para obtener el avatar actualizado
+      await refreshUser()
+    }
   }
 
   if (currentView === 'settings') {
@@ -143,7 +180,32 @@ const ProfileScreen: React.FC = () => {
         backgroundColor: "var(--bg-secondary)",
       }}
     >
-      <ProfileHeader name="Juan Pérez" email="juan.perez@cocoapp.com" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+        disabled={uploading}
+      />
+      <ProfileHeader 
+        name={authUser?.name || "Usuario"} 
+        email={authUser?.email || ""} 
+        avatar={authUser?.avatar}
+        onAvatarClick={handleAvatarClick}
+      />
+      {uploading && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "12px",
+            color: "var(--text-secondary)",
+            fontSize: "14px",
+          }}
+        >
+          Subiendo imagen...
+        </div>
+      )}
       <ProfileStats stats={statsData} />
       <ProfileMenu 
         items={menuItems}

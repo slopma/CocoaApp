@@ -3,6 +3,13 @@ import type { Finca } from "../types/domain"
 import GraficoConTabla from "../components/stats/GraficoConTabla"
 import "../styles/stats-screen.css"
 
+// Iconos desde Supabase
+const FINCA_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/finca.png"
+const PIN_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/app-icons/pin.png"
+const CULTIVOS_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/cultivos.png"
+const ARBOL_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/cacao-arbol.png"
+const FRUTO_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/cacao.png"
+
 interface StatsScreenProps {
   geodata: any
 }
@@ -285,14 +292,24 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
                   }}
                 >
                   {[
-                    { label: "Fincas", value: estructuraGeneral.fincas, icon: "🏡" },
-                    { label: "Lotes", value: estructuraGeneral.lotes, icon: "📦" },
-                    { label: "Cultivos", value: estructuraGeneral.cultivos, icon: "🌱" },
-                    { label: "Árboles", value: estructuraGeneral.arboles, icon: "🌳" },
-                    { label: "Frutos", value: estructuraGeneral.frutos, icon: "🫘" },
+                    { label: "Fincas", value: estructuraGeneral.fincas, icon: FINCA_ICON_URL },
+                    { label: "Lotes", value: estructuraGeneral.lotes, icon: PIN_ICON_URL },
+                    { label: "Cultivos", value: estructuraGeneral.cultivos, icon: CULTIVOS_ICON_URL },
+                    { label: "Árboles", value: estructuraGeneral.arboles, icon: ARBOL_ICON_URL },
+                    { label: "Frutos", value: estructuraGeneral.frutos, icon: FRUTO_ICON_URL },
                   ].map((item) => (
                     <div key={item.label} style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: "24px", marginBottom: "4px" }}>{item.icon}</div>
+                      <div style={{ fontSize: "24px", marginBottom: "4px" }}>
+                        {item.icon.startsWith('http') ? (
+                          <img 
+                            src={item.icon} 
+                            alt={item.label}
+                            style={{ width: "28px", height: "28px", objectFit: "contain" }}
+                          />
+                        ) : (
+                          item.icon
+                        )}
+                      </div>
                       <div style={{ fontSize: "22px", fontWeight: "700", color: "var(--text-primary)" }}>
                         {item.value}
                       </div>
@@ -332,10 +349,18 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
                       marginBottom: "20px", 
                       fontSize: "20px", 
                       fontWeight: "700",
-                      letterSpacing: "-0.3px"
+                      letterSpacing: "-0.3px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px"
                     }}
                   >
-                    🏡 {finca.nombre}
+                    <img 
+                      src={FINCA_ICON_URL} 
+                      alt="Finca"
+                      style={{ width: "24px", height: "24px", objectFit: "contain" }}
+                    />
+                    {finca.nombre}
                   </h3>
                   <GraficoConTabla conteo={finca.conteo} />
                   <div 
@@ -351,13 +376,23 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
                     }}
                   >
                     {[
-                      { label: "Lotes", value: finca.estructura.lotes, icon: "📦" },
-                      { label: "Cultivos", value: finca.estructura.cultivos, icon: "🌱" },
-                      { label: "Árboles", value: finca.estructura.arboles, icon: "🌳" },
-                      { label: "Frutos", value: finca.estructura.frutos, icon: "🫘" },
+                      { label: "Lotes", value: finca.estructura.lotes, icon: PIN_ICON_URL },
+                      { label: "Cultivos", value: finca.estructura.cultivos, icon: CULTIVOS_ICON_URL },
+                      { label: "Árboles", value: finca.estructura.arboles, icon: ARBOL_ICON_URL },
+                      { label: "Frutos", value: finca.estructura.frutos, icon: FRUTO_ICON_URL },
                     ].map((item) => (
                       <div key={item.label} style={{ textAlign: "center" }}>
-                        <div style={{ fontSize: "24px", marginBottom: "4px" }}>{item.icon}</div>
+                        <div style={{ fontSize: "24px", marginBottom: "4px" }}>
+                          {item.icon.startsWith('http') ? (
+                            <img 
+                              src={item.icon} 
+                              alt={item.label}
+                              style={{ width: "28px", height: "28px", objectFit: "contain" }}
+                            />
+                          ) : (
+                            item.icon
+                          )}
+                        </div>
                         <div style={{ fontSize: "22px", fontWeight: "700", color: "var(--text-primary)" }}>
                           {item.value}
                         </div>

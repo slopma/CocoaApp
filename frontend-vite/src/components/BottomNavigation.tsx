@@ -20,33 +20,47 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       className="bottom-navigation"
       style={{
         display: "flex",
-        flexDirection: "row", // fila horizontal
+        flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        height: "60px",
+        height: "70px",
         background: "var(--card-bg)",
-        borderTop: "1px solid var(--border-color)",
+        borderTop: "2px solid var(--border-color)",
         borderLeft: "none",
         borderRight: "none",
         borderBottom: "none",
         borderRadius: "0",
-        boxShadow: "var(--shadow)",
+        boxShadow: "0 -4px 20px rgba(0, 0, 0, 0.1)",
         position: "fixed",
         bottom: 0,
         left: 0,
         right: 0,
         zIndex: 2000,
+        backdropFilter: "blur(10px)",
+        backgroundColor: "rgba(var(--card-bg-rgb), 0.95)",
       }}
     >
-      {tabs.map((tab) => (
-        <BottomNavItem
-          key={tab.id}
-          id={tab.id}
-          icon={tab.icon}
-          label={tab.label}
-          active={tab.id === activeTab}
-          onClick={onTabChange}
-        />
+      {tabs.map((tab, index) => (
+        <React.Fragment key={tab.id}>
+          <BottomNavItem
+            id={tab.id}
+            icon={tab.icon}
+            label={tab.label}
+            active={tab.id === activeTab}
+            onClick={onTabChange}
+          />
+          {/* Separador vertical entre pestañas */}
+          {index < tabs.length - 1 && (
+            <div
+              style={{
+                width: "2px",
+                height: "40px",
+                background: "linear-gradient(to bottom, transparent, var(--border-color), transparent)",
+                opacity: 0.6,
+              }}
+            />
+          )}
+        </React.Fragment>
       ))}
     </nav>
   );
