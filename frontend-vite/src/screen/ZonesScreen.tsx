@@ -143,12 +143,14 @@ const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData:
         // buscamos lote con esa cadena en su nombre
         const search = normalize(m[0])
         // buscar exact match o includes
-        for (const [k, v] of lotesById) {
+        // después
+        for (const [, v] of lotesById) {
           if (normalize(v.nombre).includes(search) || search.includes(normalize(v.nombre))) {
             loteId = v.lote_id
             break
           }
         }
+
         if (!loteId) {
           // buscar por nombre completo
           const found = lotesByName.get(normalize(nombre.split(" - ")[0] || nombre))
@@ -200,7 +202,7 @@ const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData:
 
   // --- agrupar cultivos por lote_id ---
   const cultivosPorLote = new Map<string, any[]>()
-  for (const [k, cultivo] of cultivosMap.entries()) {
+  for (const [, cultivo] of cultivosMap.entries()) {
     const lid = cultivo.lote_id
     if (!cultivosPorLote.has(lid)) cultivosPorLote.set(lid, [])
     cultivosPorLote.get(lid)!.push({
@@ -213,7 +215,7 @@ const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData:
 
   // --- construir fincas usando lotesById (usa finca_id desde lote) ---
   const fincasMap = new Map<string, any>()
-  for (const [loteId, loteObj] of lotesById.entries()) {
+  for (const [, loteObj] of lotesById.entries()) {
     const fincaId = loteObj.finca_id || "finca-yariguies"
     if (!fincasMap.has(fincaId)) {
       fincasMap.set(fincaId, {

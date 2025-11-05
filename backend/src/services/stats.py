@@ -14,7 +14,7 @@ async def get_fincas_list():
     """Obtiene lista simple de fincas para filtros"""
     try:
         response = await run_in_threadpool(
-            lambda: supabase.from_("finca").select("finca_id, nombre").execute()
+            lambda: supabase.table("finca").select("finca_id, nombre").execute()
         )
         if hasattr(response, 'error') and response.error:
             raise HTTPException(status_code=500, detail=response.error.message)
@@ -33,7 +33,7 @@ async def get_lotes_by_finca(finca_id: str = Query(...)):
     try:
         finca_id = finca_id.strip().strip("/")
         response = await run_in_threadpool(
-            lambda: supabase.from_("lote")
+            lambda: supabase.table("lote")
             .select("lote_id, nombre")
             .eq("finca_id", finca_id)
             .execute()
@@ -57,10 +57,18 @@ def contar_estados(fincas: list) -> dict:
 
     def recorrer(e):
         if isinstance(e, dict):
-            # Fruto con estado
+            # Fruto con estado - buscar en estado_cacao o estado_cacao_id
             if "fruto_id" in e:
-                estado = e.get("estado_fruto", "Desconocido")
-                conteo[estado] = conteo.get(estado, 0) + 1
+                estado_cacao = e.get("estado_cacao")
+                if estado_cacao and isinstance(estado_cacao, dict):
+                    # Si viene como objeto relacionado
+                    estado_nombre = estado_cacao.get("nombre", "Desconocido")
+                elif e.get("estado_cacao_id"):
+                    # Si solo viene el ID, usar "Desconocido" temporalmente
+                    estado_nombre = "Desconocido"
+                else:
+                    estado_nombre = "Desconocido"
+                conteo[estado_nombre] = conteo.get(estado_nombre, 0) + 1
 
             # Recorre todos los subniveles: lote, cultivo, arbol, fruto
             for k, v in e.items():
@@ -82,16 +90,16 @@ def contar_estructura(fincas: list) -> dict:
     counts = {"fincas": len(fincas), "lotes": 0, "cultivos": 0, "arboles": 0, "frutos": 0}
 
     for finca in fincas:
-        lotes = finca.get("lote", [])
+        lotes = finca.get("lotes", [])
         counts["lotes"] += len(lotes)
         for lote in lotes:
-            cultivos = lote.get("cultivo", [])
+            cultivos = lote.get("cultivos", [])
             counts["cultivos"] += len(cultivos)
             for cultivo in cultivos:
-                arboles = cultivo.get("arbol", [])
+                arboles = cultivo.get("arboles", [])
                 counts["arboles"] += len(arboles)
                 for arbol in arboles:
-                    frutos = arbol.get("fruto", [])
+                    frutos = arbol.get("frutos", [])
                     counts["frutos"] += len(frutos)
 
     return counts
@@ -102,7 +110,7 @@ async def get_zones_hierarchy():
     """Obtiene jerarquía completa para el mapa de zonas"""
     try:
         response = await run_in_threadpool(
-            lambda: supabase.from_("finca").select("""
+            lambda: supabase.table("finca").select("""
                 finca_id,
                 nombre,
                 created_at,
@@ -120,7 +128,11 @@ async def get_zones_hierarchy():
                                 fruto_id,
                                 especie,
                                 created_at,
-                                estado_fruto
+                                estado_cacao_id,
+                                estado_cacao!fruto_estado_cacao_id_fkey (
+                                    estado_cacao_id,
+                                    nombre
+                                )
                             )
                         )
                     )
@@ -141,7 +153,7 @@ async def get_arbol_metrics(arbol_id: str):
     """Obtiene métricas de un árbol específico"""
     try:
         response = await run_in_threadpool(
-            lambda: supabase.from_("metrics")
+            lambda: supabase.table("metrics")
             .select("metric_id, raw, voltaje, capacitancia, created_at")
             .eq("arbol_id", arbol_id)
             .order("created_at", ascending=False)
@@ -164,48 +176,57 @@ async def get_stats(
 ):
     """Obtiene estadísticas completas con filtros opcionales"""
     try:
-        # === QUERY ORIGINAL (funcional) ===
-        query = supabase.from_("finca").select("""
-            finca_id,
-            nombre,
-            created_at,
-            lote!lote_finca_id_fkey (
-                lote_id,
+        # Construir query dentro del lambda para evitar problemas de closure
+        def build_and_execute_query():
+            query = supabase.table("finca").select("""
+                finca_id,
                 nombre,
-                cultivo!cultivo_lote_id_fkey (
-                    cultivo_id,
+                created_at,
+                lotes:lote!lote_finca_id_fkey (
+                    lote_id,
                     nombre,
-                    arbol!arbol_cultivo_id_fkey (
-                        arbol_id,
+                    cultivos:cultivo!cultivo_lote_id_fkey (
+                        cultivo_id,
                         nombre,
-                        especie,
-                        fruto!fruto_arbol_id_fkey (
-                            fruto_id,
+                        arboles:arbol!arbol_cultivo_id_fkey (
+                            arbol_id,
+                            nombre,
                             especie,
-                            created_at,
-                            estado_fruto
+                            frutos:fruto!fruto_arbol_id_fkey (
+                                fruto_id,
+                                especie,
+                                created_at,
+                                estado_cacao_id,
+                                estado_cacao!fruto_estado_cacao_id_fkey (
+                                    estado_cacao_id,
+                                    nombre
+                                )
+                            )
                         )
                     )
                 )
-            )
-        """)
+            """)
+            
+            # Aplicar filtro de finca si existe
+            if finca_id:
+                query = query.eq("finca_id", finca_id)
+            
+            return query.execute()
 
-
-        # Filtros opcionales
-        if finca_id:
-            query = query.eq("finca_id", finca_id)
-
-        response = await run_in_threadpool(lambda: query.execute())
+        response = await run_in_threadpool(build_and_execute_query)
 
         if hasattr(response, "error") and response.error:
-            raise HTTPException(status_code=500, detail=response.error.message)
+            error_msg = response.error.message if hasattr(response.error, 'message') else str(response.error)
+            import sys
+            print(f"ERROR Supabase en /stats/: {error_msg}", file=sys.stderr)
+            raise HTTPException(status_code=500, detail=error_msg)
 
         fincas = response.data or []
 
         # Filtrar lote si se especifica
         if lote_id:
             for finca in fincas:
-                finca["lote"] = [l for l in finca.get("lote", []) if l["lote_id"] == lote_id]
+                finca["lotes"] = [l for l in finca.get("lotes", []) if l["lote_id"] == lote_id]
 
         # Calcular estadísticas
         conteo_general = contar_estados(fincas)
@@ -232,5 +253,11 @@ async def get_stats(
             "fincas": fincas,
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        import sys
+        error_detail = f"{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+        print(f"ERROR en /stats/: {error_detail}", file=sys.stderr)
         raise HTTPException(status_code=500, detail=str(e))

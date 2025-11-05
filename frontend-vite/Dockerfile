@@ -10,7 +10,7 @@ COPY package*.json ./
 COPY .env .env
 
 # Instalar dependencias
-RUN npm install
+RUN npm ci
 
 # Copiar el resto del código fuente
 COPY . .
