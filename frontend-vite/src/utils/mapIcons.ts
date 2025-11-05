@@ -3,7 +3,7 @@ import L from "leaflet";
 
 // 🔹 Base pública de tu bucket en Supabase
 const supabaseBaseUrl =
-  "https://zlkdxzfxkhohlpswdmap.storage.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cacao-icons";
+  "https://zlkdxzfxkhohlpswdmap.storage.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons";
 
 // 🔹 Icono fijo para árboles
 export const ArbolIcon = L.icon({

@@ -67,14 +67,24 @@ async def get_arboles():
                         "coordinates": [centro[0] + lng_offset, centro[1] + lat_offset],
                     }
 
+            # Convertimos cada fruto: estado_fruto UUID -> nombre
+            frutos = []
+            for f in a.get("frutos", []):
+                estado_id = f.get("estado_fruto")  # UUID
+                frutos.append({
+                    **f,
+                    "estado_fruto": estados.get(estado_id, "Inmaduro")  # default
+                })
+
             result.append({
                 "arbol_id": a["arbol_id"],
                 "cultivo_id": a["cultivo_id"],
                 "nombre": a.get("nombre"),
                 "ubicacion": ubicacion,
                 "estado_arbol": estados.get(a.get("estado_arbol"), "Desconocido"),
-                "frutos": a.get("frutos", []),
+                "frutos": frutos,  # reemplaza por frutos con nombre
             })
+
 
         return {"arboles": result}
 
