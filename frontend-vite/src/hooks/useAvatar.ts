@@ -57,7 +57,7 @@ export function useAvatar() {
       if (uploadError) {
         console.error("Upload error details:", {
           message: uploadError.message,
-          statusCode: uploadError.statusCode,
+          status: (uploadError as any)?.status,
           error: uploadError,
           filePath,
           userId,
@@ -96,7 +96,7 @@ export function useAvatar() {
     }
   };
 
-  const deleteAvatar = async (userId: string, currentAvatarUrl: string): Promise<boolean> => {
+  const deleteAvatar = async (currentAvatarUrl: string): Promise<boolean> => {
     try {
       setUploading(true);
 

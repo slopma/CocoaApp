@@ -12,7 +12,7 @@ import ajustesIcon from "../utils/icons/ajustes.png"
 const ProfileScreen: React.FC = () => {
   const { stats, loading, error } = useProfileStats()
   const { authUser, signOut, refreshUser } = useAuth()
-  const { uploadAvatar, deleteAvatar, uploading } = useAvatar()
+  const { uploadAvatar, uploading, deleteAvatar } = useAvatar()
   const [currentView, setCurrentView] = useState<'profile' | 'settings'>('profile')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -85,6 +85,16 @@ const ProfileScreen: React.FC = () => {
       await refreshUser()
     }
   }
+
+  const handleDeleteAvatar = async () => {
+    if (!authUser?.avatar) return;
+
+    const success = await deleteAvatar(authUser.avatar);
+
+    if (success) {
+      await refreshUser();
+    }
+  };
 
   if (currentView === 'settings') {
     return (
@@ -193,6 +203,7 @@ const ProfileScreen: React.FC = () => {
         email={authUser?.email || ""} 
         avatar={authUser?.avatar}
         onAvatarClick={handleAvatarClick}
+        onDeleteAvatar={handleDeleteAvatar}
       />
       {uploading && (
         <div

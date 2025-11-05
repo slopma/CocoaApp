@@ -5,9 +5,10 @@ interface ProfileHeaderProps {
   email: string
   avatar?: string
   onAvatarClick?: () => void
+  onDeleteAvatar?: () => void
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar, onAvatarClick }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar, onAvatarClick, onDeleteAvatar }) => {
   return (
     <div
       style={{
@@ -112,6 +113,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ name, email, avatar, onAv
         >
           Cambiar foto de perfil
         </p>
+      )}
+      {avatar && onDeleteAvatar && (
+        <button
+          onClick={onDeleteAvatar}
+          style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            color: '#ef4444',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: '500',
+            textDecoration: 'underline',
+            padding: '0',
+            margin: '0 0 16px 8px',
+          }}
+        >
+          Eliminar foto
+        </button>
       )}
       <h2 style={{ margin: "0 0 8px 0", color: "var(--text-primary)", fontSize: "24px", fontWeight: "bold" }}>
         {name}
