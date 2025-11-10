@@ -189,7 +189,7 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
               <option value="">📍 Todas las fincas</option>
               {fincasList.map((f) => (
                 <option key={f.finca_id} value={f.finca_id}>
-                  {f.nombre}
+                  📍 {f.nombre}
                 </option>
               ))}
             </select>
@@ -226,18 +226,18 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ geodata }) => {
             >
               <option value="">🌳 Todos los lotes</option>
               {lotesList.map((l) => {
-                const isLote1 = l.nombre === "Lote 1";
+                const isAdministrativo = l.nombre.toLowerCase() === "lote 1" || l.nombre.toLowerCase().includes("administrativo");
                 return (
                   <option 
                     key={l.lote_id} 
-                    value={l.lote_id}
-                    disabled={isLote1}
+                    value={isAdministrativo ? "" : l.lote_id}
+                    disabled={isAdministrativo}
                     style={{
-                      opacity: isLote1 ? 0.5 : 1,
-                      fontStyle: isLote1 ? "italic" : "normal",
+                      opacity: isAdministrativo ? 0.5 : 1,
+                      fontStyle: isAdministrativo ? "italic" : "normal",
                     }}
                   >
-                    {l.nombre}{isLote1 ? " (Administrativo)" : ""}
+                    {isAdministrativo ? `🚫 ${l.nombre} (Administrativo)` : `🌳 ${l.nombre}`}
                   </option>
                 );
               })}
