@@ -10,7 +10,7 @@ export function useArboles() {
     const fetchArboles = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:8000/arboles");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/arboles/`);
         const json = await res.json();
         setArbolesData(json.arboles);
       } catch (err: any) {

@@ -1,22 +1,14 @@
+/* Bottom Navigation Container */
 .bottom-navigation {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  background: #fff;
-  border-top: 1px solid #ddd;
-  border-radius: 0;
-  box-shadow: none;
-  
-  display: flex;            /* importante: flex container */
-  flex-direction: row;      /* los items en fila */
-  justify-content: space-around; /* espacio igual entre botones */
-  align-items: center;      /* centra verticalmente los botones */
-
+  height: 65px;
   z-index: 2000;
 }
 
+/* Bottom Nav Item */
 .bottom-nav-item {
   display: flex;
   flex-direction: column;
@@ -24,41 +16,41 @@
   justify-content: center;
   flex: 1;
   border: none;
-  border-radius: 0;
   background: transparent;
-  box-shadow: none;
-  transform: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.bottom-nav-item:hover,
-.bottom-nav-item:focus,
 .bottom-nav-item:active {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  outline: none !important;
+  background: transparent;
 }
 
-/* Estilos globales para botones en la navegación inferior */
-.bottom-navigation button {
-  border: none !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-  outline: none !important;
+/* Hover effect - sutil cambio de opacidad */
+.bottom-nav-item:hover:not(:active) {
+  background: rgba(0, 122, 255, 0.04);
 }
 
-.bottom-navigation button:hover,
-.bottom-navigation button:focus,
-.bottom-navigation button:active {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  outline: none !important;
+/* Transiciones suaves */
+.bottom-nav-item,
+.bottom-nav-item * {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .bottom-navigation {
+    height: 60px;
+  }
+  
+  .bottom-nav-item {
+    padding: 6px 12px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .bottom-navigation {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+}

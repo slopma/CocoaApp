@@ -20,8 +20,8 @@ export const useNotifications = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        console.log("🔔 Fetching notifications from:", "http://localhost:8000/notifications");
-        const res = await fetch("http://localhost:8000/notifications");
+        console.log("🔔 Fetching notifications from:", `${import.meta.env.VITE_API_URL}/notifications/`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/notifications/`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         console.log("🔔 Notifications received:", data);
@@ -54,7 +54,7 @@ export const useNotifications = () => {
       read: false,
     };
 
-    const res = await fetch("http://localhost:8000/notifications", {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/notifications/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -90,7 +90,7 @@ export const useNotifications = () => {
     // Solo llamar al backend si no es una notificación local
     if (!id.startsWith("local_")) {
       try {
-        await fetch(`http://localhost:8000/notifications/${id}/read`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/notifications/${id}/read/`, {
           method: "PUT",
         });
       } catch (error) {
@@ -111,7 +111,7 @@ export const useNotifications = () => {
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       
       // Usar el endpoint optimizado para marcar todas como leídas
-      const res = await fetch("http://localhost:8000/notifications/mark-all-read", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/notifications/mark-all-read/`, {
         method: "PUT",
       });
       
@@ -133,7 +133,7 @@ export const useNotifications = () => {
     // Solo llamar al backend si no es una notificación local
     if (!id.startsWith("local_")) {
       try {
-        await fetch(`http://localhost:8000/notifications/${id}`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/notifications/${id}/`, {
           method: "DELETE",
         });
       } catch (error) {

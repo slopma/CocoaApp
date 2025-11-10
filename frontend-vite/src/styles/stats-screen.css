@@ -1,6 +1,3 @@
-/* Estilos para mejorar el responsivo de StatsScreen */
-
-/* Estilos para dispositivos móviles pequeños */
 @media (max-width: 640px) {
   .stats-container {
     padding: 12px !important;

@@ -11,7 +11,7 @@ export const useCultivos = () => {
     const fetchCultivos = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:8000/cultivos");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/cultivos/`);
         if (!res.ok) {
           throw new Error(`Error HTTP ${res.status}`);
         }

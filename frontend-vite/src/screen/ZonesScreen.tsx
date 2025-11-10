@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react"
 import { estadoToIconUrl } from "../utils/mapIcons"
 
 // Icono de árbol de cacao desde Supabase
-const ARBOL_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cacao-icons/arbol-de-cacao.png"
+const ARBOL_ICON_URL = "https://zlkdxzfxkhohlpswdmap.supabase.co/storage/v1/object/public/Cocoa-bucket/icons/cocoa-icons/arbol-de-cacao.png"
 
 // ----------------- Tipos (iguales a los del mapa) -----------------
 interface Fruto {
   fruto_id: string
   especie?: string
-  estado_fruto?: string
+  estado_fruto?: string | { nombre?: string }
 }
 
 interface Arbol {
@@ -45,6 +45,201 @@ interface ZonesScreenProps {
   onNavigateToMap?: (arbolId: string) => void
 }
 
+// Reemplaza toda la función organizeDataByHierarchy por la siguiente versión más robusta
+const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData: any) => {
+  const arboles = arbolesData.arboles || []
+  const cultivos = cultivosData.features || []
+  const lotes = lotesData.features || []
+
+  console.log("📊 Datos recibidos:", {
+    arboles: arboles.length,
+    cultivos: cultivos.length,
+    lotes: lotes.length
+  })
+
+  // --- utilidades geo/simple ---
+  const normalize = (s: any) => (s || "").toString().trim().toLowerCase()
+
+  function getPolygonRings(feature: any) {
+    if (!feature || !feature.geometry) return []
+    const g = feature.geometry
+    if (g.type === "Polygon") return g.coordinates
+    if (g.type === "MultiPolygon") return g.coordinates.flat()
+    return []
+  }
+
+  function pointInRing(point: [number, number], ring: number[][]) {
+    // Ray-casting algorithm for a single ring
+    const x = point[0], y = point[1]
+    let inside = false
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1]
+      const xj = ring[j][0], yj = ring[j][1]
+      const intersect = ((yi > y) !== (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi + 0.0) + xi)
+      if (intersect) inside = !inside
+    }
+    return inside
+  }
+
+  function polygonContainsPoint(feature: any, point: [number, number]) {
+    const rings = getPolygonRings(feature)
+    for (const ring of rings) {
+      if (pointInRing(point, ring)) return true
+    }
+    return false
+  }
+
+  function centroidOfFeature(feature: any): [number, number] | null {
+    if (!feature || !feature.geometry) return null
+    const g = feature.geometry
+    if (g.type === "Point") return [g.coordinates[0], g.coordinates[1]]
+    // polygon centroid approx: average of first ring vertices
+    const rings = getPolygonRings(feature)
+    if (rings.length === 0) return null
+    const ring0 = rings[0]
+    const xs = ring0.map((p: number[]) => p[0])
+    const ys = ring0.map((p: number[]) => p[1])
+    const cx = xs.reduce((a: number, b: number) => a + b, 0) / xs.length
+    const cy = ys.reduce((a: number, b: number) => a + b, 0) / ys.length
+    return [cx, cy]
+  }
+
+  // --- maps de lotes por id y por nombre (normalizado) ---
+  const lotesById = new Map<string, any>()
+  const lotesByName = new Map<string, any>() // nombre normalizado -> lote
+
+  lotes.forEach((l: any) => {
+    const props = l.properties || {}
+    if (!props.lote_id) return
+    lotesById.set(props.lote_id, {
+      lote_id: props.lote_id,
+      nombre: props.nombre,
+      finca_id: props.finca_id || "finca-yariguies",
+      estado: props.estado,
+      __feature: l
+    })
+    lotesByName.set(normalize(props.nombre), {
+      lote_id: props.lote_id,
+      nombre: props.nombre,
+      finca_id: props.finca_id || "finca-yariguies",
+      estado: props.estado,
+      __feature: l
+    })
+  })
+
+  // --- cultivos: resolver lote_id (varios fallbacks) ---
+  const cultivosMap = new Map<string, any>()
+  cultivos.forEach((c: any) => {
+    const p = c.properties || {}
+    const cultivoId = p.cultivo_id || p.id || null
+    const nombre = p.nombre || p.name || ""
+    let loteId = p.lote_id || null
+
+    // fallback 1: si nombre tiene "Lote X" o "Zona X" intentar emparejar por nombre
+    if (!loteId) {
+      const m = nombre.match(/(Lote|Zona)\s*\d+/i)
+      if (m) {
+        // buscamos lote con esa cadena en su nombre
+        const search = normalize(m[0])
+        // buscar exact match o includes
+        // después
+        for (const [, v] of lotesById) {
+          if (normalize(v.nombre).includes(search) || search.includes(normalize(v.nombre))) {
+            loteId = v.lote_id
+            break
+          }
+        }
+
+        if (!loteId) {
+          // buscar por nombre completo
+          const found = lotesByName.get(normalize(nombre.split(" - ")[0] || nombre))
+          if (found) loteId = found.lote_id
+        }
+      }
+    }
+
+    // fallback 2: coincidencia por nombre exacto (normalized)
+    if (!loteId) {
+      const maybe = lotesByName.get(normalize(nombre))
+      if (maybe) loteId = maybe.lote_id
+    }
+
+    // fallback 3: búsqueda espacial (centroid + point-in-polygon)
+    if (!loteId) {
+      const centro = centroidOfFeature(c)
+      if (centro) {
+        for (const [id, loteObj] of lotesById.entries()) {
+          if (polygonContainsPoint(loteObj.__feature, centro)) {
+            loteId = id
+            break
+          }
+        }
+      }
+    }
+
+    cultivosMap.set(cultivoId || `no-id-${Math.random()}`, {
+      cultivo_id: cultivoId,
+      nombre,
+      especie: p.especie || p.species || null,
+      lote_id: loteId,
+      __feature: c
+    })
+
+    console.log(`➡️ Cultivo '${nombre}' -> lote_id=${loteId}`)
+  })
+
+  // --- agrupar árboles por cultivo_id (ya vienen del backend) ---
+  const arbolesPorCultivo = new Map<string, any[]>()
+  arboles.forEach((arbol: any) => {
+    const cultivoId = arbol.cultivo_id
+    if (!arbolesPorCultivo.has(cultivoId)) arbolesPorCultivo.set(cultivoId, [])
+    arbolesPorCultivo.get(cultivoId)!.push({
+      ...arbol,
+      frutos: arbol.frutos || []
+    })
+  })
+
+  // --- agrupar cultivos por lote_id ---
+  const cultivosPorLote = new Map<string, any[]>()
+  for (const [, cultivo] of cultivosMap.entries()) {
+    const lid = cultivo.lote_id
+    if (!cultivosPorLote.has(lid)) cultivosPorLote.set(lid, [])
+    cultivosPorLote.get(lid)!.push({
+      cultivo_id: cultivo.cultivo_id,
+      nombre: cultivo.nombre,
+      especie: cultivo.especie,
+      arbol: arbolesPorCultivo.get(cultivo.cultivo_id) || []
+    })
+  }
+
+  // --- construir fincas usando lotesById (usa finca_id desde lote) ---
+  const fincasMap = new Map<string, any>()
+  for (const [, loteObj] of lotesById.entries()) {
+    const fincaId = loteObj.finca_id || "finca-yariguies"
+    if (!fincasMap.has(fincaId)) {
+      fincasMap.set(fincaId, {
+        finca_id: fincaId,
+        nombre: "Finca Yariguíes",
+        created_at: new Date().toISOString(),
+        lote: []
+      })
+    }
+    fincasMap.get(fincaId).lote.push({
+      lote_id: loteObj.lote_id,
+      nombre: loteObj.nombre,
+      finca_id: fincaId,
+      estado: loteObj.estado,
+      cultivo: cultivosPorLote.get(loteObj.lote_id) || []
+    })
+  }
+
+  const result = Array.from(fincasMap.values())
+  console.log("🏗️ Estructura organizada:", result)
+  return result
+}
+
+
 // ----------------- Componente -----------------
 const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
   const [fincas, setFincas] = useState<Finca[]>([])
@@ -61,17 +256,19 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
       setLoading(true)
       try {
         // Obtener árboles con frutos (mismos datos que el mapa)
-        const arbolesRes = await fetch("http://localhost:8000/arboles")
+        const arbolesRes = await fetch(`${import.meta.env.VITE_API_URL}/arboles/`)
         if (!arbolesRes.ok) throw new Error(`HTTP ${arbolesRes.status}`)
         const arbolesData = await arbolesRes.json()
         
         // Obtener cultivos para organizar por lotes
-        const cultivosRes = await fetch("http://localhost:8000/cultivos")
+        const cultivosRes = await fetch(`${import.meta.env.VITE_API_URL}/cultivos/`)
+      
         if (!cultivosRes.ok) throw new Error(`HTTP ${cultivosRes.status}`)
         const cultivosData = await cultivosRes.json()
         
         // Obtener lotes
-        const lotesRes = await fetch("http://localhost:8000/lotes")
+        const lotesRes = await fetch(`${import.meta.env.VITE_API_URL}/lotes/`)
+        
         if (!lotesRes.ok) throw new Error(`HTTP ${lotesRes.status}`)
         const lotesData = await lotesRes.json()
         
@@ -94,99 +291,6 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
 
     fetchZonesData()
   }, [])
-
-          // Función para organizar los datos en estructura jerárquica
-          const organizeDataByHierarchy = (arbolesData: any, cultivosData: any, lotesData: any) => {
-            // Extraer datos de los formatos de respuesta
-            const arboles = arbolesData.arboles || []
-            const cultivos = cultivosData.features || []
-            const lotes = lotesData.features || []
-            
-            console.log("📊 Datos recibidos:", {
-              arboles: arboles.length,
-              cultivos: cultivos.length, 
-              lotes: lotes.length
-            })
-            
-            // Crear mapas para acceso rápido
-            const cultivosMap = new Map()
-            cultivos.forEach((c: any) => {
-              if (c.properties?.cultivo_id) {
-                cultivosMap.set(c.properties.cultivo_id, {
-                  cultivo_id: c.properties.cultivo_id,
-                  nombre: c.properties.nombre,
-                  especie: c.properties.especie,
-                  lote_id: c.properties.nombre.split(' - ')[0].replace('Lote ', '') // Extraer número de lote del nombre
-                })
-              }
-            })
-            
-            const lotesMap = new Map()
-            lotes.forEach((l: any) => {
-              if (l.properties?.lote_id) {
-                const loteNumero = l.properties.nombre.replace('Lote ', '')
-                lotesMap.set(loteNumero, {
-                  lote_id: l.properties.lote_id,
-                  nombre: l.properties.nombre,
-                  finca_id: "finca-yariguies", // Hardcodeado por ahora
-                  estado: l.properties.estado
-                })
-              }
-            })
-            
-            // Agrupar árboles por cultivo
-            const arbolesPorCultivo = new Map<string, any[]>()
-            arboles.forEach((arbol: any) => {
-              const cultivoId = arbol.cultivo_id
-              if (!arbolesPorCultivo.has(cultivoId)) {
-                arbolesPorCultivo.set(cultivoId, [])
-              }
-              
-              // Usar los frutos reales del backend
-              const frutosReales = arbol.frutos || []
-              
-              arbolesPorCultivo.get(cultivoId)!.push({
-                ...arbol,
-                frutos: frutosReales
-              })
-            })
-            
-            // Agrupar cultivos por lote
-            const cultivosPorLote = new Map<string, any[]>()
-            cultivosMap.forEach((cultivo: any) => {
-              const loteNumero = cultivo.lote_id
-              if (!cultivosPorLote.has(loteNumero)) {
-                cultivosPorLote.set(loteNumero, [])
-              }
-              cultivosPorLote.get(loteNumero)!.push({
-                ...cultivo,
-                arbol: arbolesPorCultivo.get(cultivo.cultivo_id) || []
-              })
-            })
-            
-            // Crear estructura de fincas
-            const fincasMap = new Map<string, any>()
-            lotesMap.forEach((lote: any) => {
-              const fincaId = lote.finca_id
-              if (!fincasMap.has(fincaId)) {
-                fincasMap.set(fincaId, {
-                  finca_id: fincaId,
-                  nombre: "Finca Yariguíes",
-                  created_at: new Date().toISOString(),
-                  lote: []
-                })
-              }
-              
-              fincasMap.get(fincaId).lote.push({
-                ...lote,
-                cultivo: cultivosPorLote.get(lote.nombre.replace('Lote ', '')) || []
-              })
-            })
-            
-            const result = Array.from(fincasMap.values())
-            console.log("🏗️ Estructura organizada:", result)
-            return result
-          }
 
   // Función para ordenar ascendente
   const sortAsc = <T extends { nombre?: string; especie?: string | null }>(
@@ -347,8 +451,8 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
           {openFinca === finca.finca_id && (
             <div>
               {sortAsc(finca.lote).map((lote) => {
-                // Verificar si es el Lote 1 (administrativo)
-                const isLote1 = lote.nombre === "Lote 1";
+                // Verificar si es el lote administrativo
+                const isAdministrativo = lote.nombre === "Administrativo";
                 
                 return (
                 <div
@@ -356,23 +460,23 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                   style={{
                     padding: "18px 22px",
                     borderBottom: "1px solid var(--border-color)",
-                    cursor: isLote1 ? "not-allowed" : "pointer",
-                    backgroundColor: isLote1 ? "var(--bg-secondary)" : "var(--card-bg)",
-                    opacity: isLote1 ? 0.6 : 1,
+                    cursor: isAdministrativo ? "not-allowed" : "pointer",
+                    backgroundColor: isAdministrativo ? "#e5e7eb" : "var(--card-bg)",
+                    opacity: isAdministrativo ? 0.7 : 1,
                     transition: "all 0.2s ease",
                   }}
                   onClick={() => {
-                    if (!isLote1) {
+                    if (!isAdministrativo) {
                       setOpenLote(openLote === lote.lote_id ? null : lote.lote_id)
                     }
                   }}
                   onMouseEnter={(e) => {
-                    if (!isLote1) {
+                    if (!isAdministrativo) {
                       e.currentTarget.style.backgroundColor = "var(--bg-secondary)";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (!isLote1) {
+                    if (!isAdministrativo) {
                       e.currentTarget.style.backgroundColor = "var(--card-bg)";
                     }
                   }}
@@ -385,20 +489,24 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <span style={{ fontSize: "16px", fontWeight: "500", color: "var(--text-primary)" }}>
-                        📍 {lote.nombre}
+                      <span style={{ 
+                        fontSize: "16px", 
+                        fontWeight: "500", 
+                        color: isAdministrativo ? "#9ca3af" : "var(--text-primary)" 
+                      }}>
+                        {isAdministrativo ? "🔒" : "📍"} {lote.nombre}
                       </span>
-                      {isLote1 && (
+                      {isAdministrativo && (
                         <span style={{ 
                           fontSize: "12px", 
-                          color: "var(--text-muted)", 
+                          color: "#9ca3af", 
                           fontStyle: "italic" 
                         }}>
-                          🔒 Lote administrativo
+                          Lote administrativo - No contiene frutos
                         </span>
                       )}
                     </div>
-                    {!isLote1 && (
+                    {!isAdministrativo && (
                       <span
                         style={{
                           fontSize: "16px",
@@ -416,7 +524,7 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                   </div>
 
                   {/* Árboles directamente en el lote */}
-                  {openLote === lote.lote_id && !isLote1 && (
+                  {openLote === lote.lote_id && !isAdministrativo && (
                     <div style={{ marginTop: "8px", marginLeft: "20px" }}>
                       {(() => {
                         // Recopilar todos los árboles de todos los cultivos del lote
@@ -507,7 +615,11 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                                       {arbol.frutos.length > 0 ? (
                                         [...arbol.frutos].sort((a: Fruto, b: Fruto) =>
                                           (a.especie ?? "").localeCompare(b.especie ?? "")
-                                        ).map((fruto: Fruto) => (
+                                        ).map((fruto: Fruto) => {
+                                          const estadoNombre = (fruto.estado_fruto as any)?.nombre ?? fruto.estado_fruto ?? "inmaduro";
+                                          const altText = (fruto.estado_fruto as any)?.nombre ?? fruto.estado_fruto ?? "Inmaduro";
+                                          
+                                          return (
                                           <div
                                             key={fruto.fruto_id}
                                             style={{
@@ -562,8 +674,8 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                                             }}
                                           >
                                             <img
-                                              src={estadoToIconUrl[fruto.estado_fruto?.toLowerCase() || "inmaduro"]}
-                                              alt={fruto.estado_fruto || "Inmaduro"}
+                                              src={estadoToIconUrl[estadoNombre.toLowerCase()] || estadoToIconUrl.inmaduro}
+                                              alt={altText}
                                               style={{
                                                 width: "28px",
                                                 height: "28px",
@@ -583,7 +695,7 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                                                   opacity: 0.8,
                                                   fontWeight: "500"
                                                 }}>
-                                                  Estado: {fruto.estado_fruto}
+                                                  Estado: {altText}
                                                 </span>
                                               )}
                                             </div>
@@ -596,7 +708,7 @@ const ZonesScreen: React.FC<ZonesScreenProps> = ({ onNavigateToMap }) => {
                                             </span>
 
                                                     </div>
-                                                  ))
+                                          )})
                                                 ) : (
                                         <div style={{ 
                                           fontSize: "13px", 

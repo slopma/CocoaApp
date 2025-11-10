@@ -80,11 +80,11 @@ const Map: React.FC<MapProps> = ({
   };
 
   return (
-    <div style={{ height: "100%", width: "100%", position: "relative" }}>
+    <div style={{ height: "100%", width: "100%", position: "relative", overflow: "hidden" }}>
       <MapContainer
         center={fincaUnoPosition}
         zoom={17}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", border: "none", outline: "none" }}
       >
             {/* Componente para hacer zoom al árbol seleccionado */}
             <ZoomToArbol arbolId={focusArbolId} />

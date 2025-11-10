@@ -16,8 +16,11 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
   active,
   onClick,
 }) => {
+  const [isPressed, setIsPressed] = React.useState(false);
+
   return (
     <button
+      className="bottom-nav-item"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -25,44 +28,82 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
         justifyContent: "center",
         gap: "4px",
         cursor: "pointer",
-        color: active ? "#007AFF" : "#8E8E93",
-        padding: "8px",
+        color: active ? "#007AFF" : "#6B7280",
+        padding: "8px 16px",
         flex: 1,
-        minWidth: "60px",
+        minWidth: "70px",
         border: "none",
         borderRadius: "0",
-        backgroundColor: "transparent",
+        backgroundColor: active ? "rgba(0, 122, 255, 0.05)" : "transparent",
         outline: "none",
+        transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: isPressed ? "scale(0.96)" : "scale(1)",
+        position: "relative",
+        boxShadow: active 
+          ? "0 2px 8px rgba(0, 122, 255, 0.15), 0 1px 3px rgba(0, 122, 255, 0.1)" 
+          : "none",
       }}
-      onClick={() => onClick(id)}  // ✅ Aquí se llama al callback con el id del tab
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.boxShadow = "none";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.boxShadow = "none";
-      }}
-      onFocus={(e) => {
-        e.currentTarget.style.backgroundColor = "transparent";
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.outline = "none";
-      }}
+      onClick={() => onClick(id)}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      onTouchStart={() => setIsPressed(true)}
+      onTouchEnd={() => setIsPressed(false)}
     >
-      <img 
-        src={icon} 
-        alt={label}
+      {/* Indicador superior para tab activo */}
+      {active && (
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "40px",
+            height: "2.5px",
+            backgroundColor: "#007AFF",
+            borderRadius: "0 0 2px 2px",
+            boxShadow: "0 2px 8px rgba(0, 122, 255, 0.35)",
+          }}
+        />
+      )}
+      
+      {/* Icono */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "28px",
+          height: "28px",
+          transition: "all 0.25s ease",
+        }}
+      >
+        <img 
+          src={icon} 
+          alt={label}
+          style={{ 
+            width: "24px", 
+            height: "24px",
+            filter: active 
+              ? "brightness(1.05) saturate(1.2)" 
+              : "grayscale(50%) opacity(0.65)",
+            transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+          }} 
+        />
+      </div>
+      
+      {/* Label */}
+      <span 
         style={{ 
-          width: "24px", 
-          height: "24px",
-          filter: active ? "none" : "grayscale(100%) opacity(0.5)",
-          transition: "filter 0.2s ease"
-        }} 
-      />
-      <span style={{ fontSize: "10px", fontWeight: "500" }}>{label}</span>
+          fontSize: "10px", 
+          fontWeight: active ? "600" : "500",
+          letterSpacing: "0.2px",
+          transition: "all 0.25s ease",
+          opacity: active ? 1 : 0.75,
+        }}
+      >
+        {label}
+      </span>
     </button>
   );
 };

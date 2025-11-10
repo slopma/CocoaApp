@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 router = APIRouter()
 
-@router.delete("/duplicates")
+@router.delete("/duplicates/")
 def cleanup_duplicates():
     """
     Limpia elementos duplicados creados por el clustering

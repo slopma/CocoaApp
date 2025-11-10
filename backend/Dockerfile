@@ -1,17 +1,28 @@
-FROM python:3.13.6-slim
+# Imagen base
+FROM python:3.11-slim
 
+# Establecer directorio de trabajo
 WORKDIR /app
 
-# Instalar dependencias
+# Evitar prompts interactivos
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalar dependencias del sistema necesarias
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requerimientos e instalarlos
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-
-
-# Copiar código fuente
+# Copiar todo el código del proyecto
 COPY . .
 
+# Exponer el puerto
 EXPOSE 8000
 
-# Usar Gunicorn con UvicornWorkers para producción
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "app.main:app", "--bind", "0.0.0.0:8000", "--workers", "4"]
+# Comando por defecto: iniciar FastAPI con Uvicorn
+CMD ["uvicorn", "src.db.main:app", "--host", "0.0.0.0", "--port", "8000"]

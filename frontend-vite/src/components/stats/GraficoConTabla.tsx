@@ -1,16 +1,39 @@
-import React from "react"
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
 import { COLORS } from "./constants"
+import React, { useMemo } from "react" // ✅ usar useMemo
+
 
 interface GraficoConTablaProps {
   conteo: Record<string, number>
 }
 
 const GraficoConTabla: React.FC<GraficoConTablaProps> = ({ conteo }) => {
-  const data = Object.entries(conteo).map(([estado, valor]) => ({
-    name: estado,
-    value: valor,
-  }))
+  const data = useMemo(() => {
+    if (!conteo || Object.keys(conteo).length === 0) {
+      console.warn("⚠️ Conteo vacío o indefinido:", conteo);
+      return [];
+    }
+
+    const parsed = Object.entries(conteo)
+      .filter(([_, valor]) => typeof valor === "number" && valor > 0)
+      .map(([estado, valor]) => ({
+        name: estado,
+        value: valor,
+      }));
+
+    console.debug("📊 Datos procesados para gráfico:", parsed);
+    return parsed;
+  }, [conteo]);
+
+  if (data.length === 0) {
+    return (
+      <div style={{ textAlign: "center", padding: "30px", color: "var(--text-secondary)" }}>
+        <p>📉 No hay datos disponibles para mostrar el gráfico</p>
+      </div>
+    );
+  }
+
+
 
   return (
     <div 
